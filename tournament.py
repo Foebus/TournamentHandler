@@ -1,7 +1,6 @@
 import challenger
 import tree
 
-
 class Group:
     def __init__(self, members, title="unnamed"):
         self.challengers = members
@@ -139,7 +138,25 @@ class Tournament:
                     people_who_want_it += 1
                 calif_group = Group([self.challengers_pool[max_authorized - 1], self.challengers_pool[max_authorized]],
                                     "Qualifications")
-
+                for i in range(max_authorized - places_to_fill):
+                    if i % 2 == 0:
+                        self.ka.add_challenger(self.challengers_pool[i])
+                    else:
+                        self.ki.add_challenger(self.challengers_pool[i])
+                if (people_who_want_it / places_to_fill) % 2 == 0:
+                    pre_qualification_nbr = (people_who_want_it / places_to_fill) / 2
+                    sub_calif_groups = []
+                    for i in range(0, pre_qualification_nbr, 2):
+                        sub_calif_groups[i] = Group([], "Qualification")
+                        sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized - places_to_fill + i])
+                        sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
+                                                                                 places_to_fill + i + 1])
+                        if i % 2 == 0:
+                            self.tournament_tree.search_node(self.ki)[0].add_child(sub_calif_groups[i])
+                        else:
+                            self.tournament_tree.search_node(self.ka)[0].add_child(sub_calif_groups[i])
+                else:
+                    print "I'm not built for this case, handle it yourself!"
                 # self.tournament_tree.search_node(self.ki)[0].add_child(calif_group)
                 # i = 1
                 # while self.challengers_pool[max_authorized - 1].points == self.challengers_pool[
