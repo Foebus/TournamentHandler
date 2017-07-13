@@ -1,5 +1,7 @@
+# coding=utf-8
 import challenger
 import tree
+
 
 class Group:
     def __init__(self, members, title="unnamed"):
@@ -112,14 +114,14 @@ class Tournament:
             self.tournament_tree.search_node(self.ba)[0].add_child(self.delta)
 
         else:
-            self.alpha = Group([marion, liza, lea], "Pool, tour 1")
-            self.beta = Group([matthieu, laure], "Pool, tour 1")
-            self.delta = Group([heloise, cendrier], "Pool, tour 1")
-            self.gamma = Group([chouaps, tim], "Pool, tour 1")
-            self.epsilon = Group([valentin, marc], "Pool, tour 1")
-            self.alif = Group([lea, laure, valentin, chouaps], "Pool, tour 2")
-            self.ba = Group([tim, marion, heloise, matthieu], "Pool, tour 2")
-            self.ta = Group([marc, liza, cendrier], "Pool, tour 2")
+            self.beta = Group([matthieu, laure], "Pool renard")
+            self.ta = Group([marc, liza, cendrier], "Pool et pill")
+            self.gamma = Group([chouaps, tim], "Pool d'eau")
+            self.alpha = Group([marion, liza, lea], "Pool coq")
+            self.epsilon = Group([valentin, marc], "Pool ayer")
+            self.delta = Group([heloise, cendrier], "Pool ai piou, piou, piou")
+            self.alif = Group([lea, laure, valentin, chouaps], "Pool ie")
+            self.ba = Group([tim, marion, heloise, matthieu], "Pool, the swimming one")
             self.groups = [self.alpha, self.beta, self.delta, self.gamma, self.epsilon, self.alif,
                            self.ba, self.ta, self.ka, self.ki, self.igitsa]
 
@@ -130,31 +132,74 @@ class Tournament:
             if self.challengers_pool[max_authorized - 1].points == self.challengers_pool[max_authorized].points:
                 places_to_fill = 1
                 while self.challengers_pool[max_authorized - 1].points == \
-                        self.challengers_pool[max_authorized - places_to_fill + 1].points:
+                        self.challengers_pool[max_authorized - places_to_fill - 1].points:
                     places_to_fill += 1
                 people_who_want_it = places_to_fill
                 while self.challengers_pool[max_authorized - places_to_fill].points == \
                         self.challengers_pool[max_authorized - places_to_fill + people_who_want_it].points:
                     people_who_want_it += 1
-                calif_group = Group([self.challengers_pool[max_authorized - 1], self.challengers_pool[max_authorized]],
-                                    "Qualifications")
                 for i in range(max_authorized - places_to_fill):
                     if i % 2 == 0:
                         self.ka.add_challenger(self.challengers_pool[i])
                     else:
                         self.ki.add_challenger(self.challengers_pool[i])
-                if (people_who_want_it / places_to_fill) % 2 == 0:
-                    pre_qualification_nbr = (people_who_want_it / places_to_fill) / 2
-                    sub_calif_groups = []
-                    for i in range(0, pre_qualification_nbr, 2):
-                        sub_calif_groups[i] = Group([], "Qualification")
-                        sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized - places_to_fill + i])
-                        sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
-                                                                                 places_to_fill + i + 1])
+                if (people_who_want_it / places_to_fill) % 2 == 0 and places_to_fill <= 4:
+                    if places_to_fill % 2 == 0:
+                        pre_qualification_nbr = (people_who_want_it / places_to_fill) / 2
+                        sub_calif_groups = []
+                        for i in range(0, pre_qualification_nbr, 2):
+                            sub_calif_groups.append(Group([], "Qualification"))
+                            sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
+                                                                                     places_to_fill + i])
+                            sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
+                                                                                     places_to_fill + i + 1])
+                            if i % 2 == 0:
+                                self.tournament_tree.search_node(self.ki)[0].add_child(sub_calif_groups[i])
+                            else:
+                                self.tournament_tree.search_node(self.ka)[0].add_child(sub_calif_groups[i])
+                            self.calif.append(sub_calif_groups[i])
+                    else:
+                        pre_qualification_nbr = (people_who_want_it / places_to_fill) / 2
+                        sub_calif_groups = []
+                        calif_groups = []
+                        for i in range(pre_qualification_nbr / 2):
+                            calif_groups.append(Group([], "Qualification, deuxième fournée"))
+                            if i % 2 == 0:
+                                self.tournament_tree.search_node(self.ki)[0].add_child(calif_groups[i])
+                            else:
+                                self.tournament_tree.search_node(self.ka)[0].add_child(calif_groups[i])
+                            self.calif.append(calif_groups[i])
+                        for i in range(pre_qualification_nbr):
+                            sub_calif_groups.append(Group([], "Qualification, " + str(people_who_want_it) +
+                                                          " challengers se disputent " + str(places_to_fill)+" places"))
+                            sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
+                                                                                     places_to_fill + i * 2])
+                            sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
+                                                                                     places_to_fill + i * 2 + 1])
+
+                            self.tournament_tree.search_node(calif_groups[i % len(calif_groups)])[0].add_child(
+                                sub_calif_groups[i])
+                            self.calif.insert(0, sub_calif_groups[i])
+                elif people_who_want_it % 3 == 0 and places_to_fill % 2 == 0:
+                    pre_qualification_nbr = people_who_want_it / 3
+                    calif_groups = []
+                    for i in range(pre_qualification_nbr / 2):
+                        calif_groups.append(Group([], "Qualification, deuxième fournée"))
                         if i % 2 == 0:
-                            self.tournament_tree.search_node(self.ki)[0].add_child(sub_calif_groups[i])
+                            self.tournament_tree.search_node(self.ki)[0].add_child(calif_groups[i])
                         else:
-                            self.tournament_tree.search_node(self.ka)[0].add_child(sub_calif_groups[i])
+                            self.tournament_tree.search_node(self.ka)[0].add_child(calif_groups[i])
+                        self.calif.append(calif_groups[i])
+
+                        self.calif.append(self.ka)
+                        self.calif.append(self.ki)
+                        self.calif.append(self.igitsa)
+                        self.groups = self.calif
+                        self.doneRound = -1
+
+                        self.tournament_type = "deux parmi trois"
+                        self.pool_round = pre_qualification_nbr
+                        return
                 else:
                     print "I'm not built for this case, handle it yourself!"
                 # self.tournament_tree.search_node(self.ki)[0].add_child(calif_group)
@@ -168,7 +213,6 @@ class Tournament:
                 #     self.tournament_tree.search_node(calif_group)[0].add_child(sub_calif_group)
                 #     i += 2
 
-                self.calif.append(calif_group)
             else:
                 for j in range(0, max_authorized - 1, 2):
                     self.ka.add_challenger(self.challengers_pool[j])
@@ -190,11 +234,12 @@ class Tournament:
                         self.rattrapages.add_challenger(node.get_value().get_loser())
                 elif self.tournament_type == "deux_tours_pool_plus_qualif":
                     self.groups[self.doneRound].sort_challengers_by_points()
-                    self.challengers_pool[0].add_points(4 - self.groups[self.doneRound].challengerNumber)
+                    self.groups[self.doneRound].challengers[0].add_points(4 -
+                                                                          self.groups[self.doneRound].challengerNumber)
                     for k in range(self.groups[self.doneRound].challengerNumber):
                         self.challengers_pool[self.challengers_pool.index(self.groups[self.doneRound].challengers[k])] \
                             .add_points(self.groups[self.doneRound].challengerNumber - k)
-                    if self.doneRound == self.pool_round:
+                    if self.doneRound == self.pool_round-1:
                         self.handle_qualifications()
             self.doneRound += 1
             return self.groups[self.doneRound]
