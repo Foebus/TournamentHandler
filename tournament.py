@@ -72,19 +72,21 @@ class Tournament:
     def __init__(self, tournament_type="elimination directe", pool_rounds=0):
         self.doneRound = -1
         self.tournament_type = tournament_type
-        marc = challenger.Challenger("Xenouvite", "Images/marc.png")
-        marion = challenger.Challenger("Kiwi", "Images/marion.jpg")
-        chouaps = challenger.Challenger("Chouaps", "Images/chouaps.png")
-        cendrier = challenger.Challenger("Cendrier", "Images/cendrier.png")
-        laure = challenger.Challenger("Grinty", "Images/laure.png")
-        liza = challenger.Challenger("Liza", "Images/liza.jpg")
-        valentin = challenger.Challenger("valentin", "Images/valentin.jpg")
-        matthieu = challenger.Challenger("matthieu", "Images/matthieu.jpg")
-        heloise = challenger.Challenger("heloise", "Images/heloise.jpg")
-        tim = challenger.Challenger("Ancestral", "Images/tim.jpg")
-        lea = challenger.Challenger("MegaBombasse", "Images/lea.png")
+        marc = challenger.Challenger("marc", "Xenouvite", "Images/marc.png")
+        marion = challenger.Challenger("marion", "Kiwi", "Images/marion.jpg")
+        chouaps = challenger.Challenger("chouaps", "Chouaps", "Images/chouaps.png")
+        cendrier = challenger.Challenger("cendrier", "Cendrier", "Images/cendrier.png")
+        laure = challenger.Challenger("laure", "Grinty", "Images/laure.png")
+        liza = challenger.Challenger("liza", "Lywell", "Images/liza.jpg")
+        valentin = challenger.Challenger("valentin", "BobLAviateur", "Images/valentin.jpg")
+        matthieu = challenger.Challenger("matthieu", "Turgescence_Incontrolable", "Images/matthieu.jpg")
+        heloise = challenger.Challenger("heloise", "Maywens", "Images/heloise.jpg")
+        tim = challenger.Challenger("tim", "Ancestral", "Images/tim.jpg")
+        lea = challenger.Challenger("lea", "MegaBombasse", "Images/lea.png")
+        theo = challenger.Challenger("theo", "Théo", "Images/theo.jpg")
 
-        self.challengers_pool = [marc, marion, chouaps, cendrier, liza, laure, valentin, matthieu, heloise, tim, lea]
+        self.challengers_pool = [marc, marion, chouaps, cendrier, liza, laure, valentin, matthieu, heloise, tim, lea,
+                                 theo]
         self.pool_round = pool_rounds
         self.ka = Group([], "Demi-Finale")
         self.ki = Group([], "Demi-Finale")
@@ -117,16 +119,17 @@ class Tournament:
             self.tournament_tree.search_node(self.ba)[0].add_child(self.delta)
 
         else:
-            self.beta = Group([matthieu, laure], "Pool renard")
-            self.ta = Group([marc, liza, cendrier], "Pool et pill")
-            self.gamma = Group([chouaps, tim], "Pool d'eau")
-            self.alpha = Group([marion, liza, lea], "Pool coq")
-            self.epsilon = Group([valentin, marc], "Pool ayer")
-            self.delta = Group([heloise, cendrier], "Pool ai piou, piou, piou")
-            self.alif = Group([lea, laure, valentin, chouaps], "Pool ie")
-            self.ba = Group([tim, marion, heloise, matthieu], "Pool, the swimming one")
+            self.beta = Group([liza, laure], "Pool renard")
+            self.ta = Group([laure, theo, liza, cendrier], "Pool et pill")
+            self.gamma = Group([chouaps, theo], "Pool d'eau")
+            self.alpha = Group([marion, lea], "Pool coq")
+            self.epsilon = Group([valentin, tim], "Pool ayer")
+            self.delta = Group([matthieu, cendrier], "Pool ai piou, piou, piou")
+            self.iota = Group([heloise, marc], "Pool ai piou, piou, piou")
+            self.alif = Group([lea, tim, valentin, heloise], "Pool liche")
+            self.ba = Group([marc, matthieu, marion, chouaps], "Pool, the swimming one")
             self.groups = [self.alpha, self.beta, self.delta, self.gamma, self.epsilon, self.alif,
-                           self.ba, self.ta, self.ka, self.ki, self.igitsa]
+                           self.ba, self.ta, self.iota, self.ka, self.ki, self.igitsa]
 
     def handle_qualifications(self, max_authorized=4):
         if not self.calif:
@@ -165,7 +168,7 @@ class Tournament:
                         pre_qualification_nbr = (people_who_want_it / places_to_fill) / 2
                         sub_calif_groups = []
                         calif_groups = []
-                        for i in range(pre_qualification_nbr / 2):
+                        for i in range(max(pre_qualification_nbr / 2, 1)):
                             calif_groups.append(Group([], "Qualification, deuxième fournée"))
                             if i % 2 == 0:
                                 self.tournament_tree.search_node(self.ki)[0].add_child(calif_groups[i])
@@ -270,3 +273,5 @@ class Tournament:
                     tmp = self.challengers_pool[i]
                     self.challengers_pool[i] = self.challengers_pool[i + 1]
                     self.challengers_pool[i + 1] = tmp
+
+
