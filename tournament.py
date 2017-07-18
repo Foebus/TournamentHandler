@@ -1,4 +1,6 @@
 # coding=utf-8
+import pickle
+
 import challenger
 import tree
 
@@ -72,18 +74,18 @@ class Tournament:
     def __init__(self, tournament_type="elimination directe", pool_rounds=0):
         self.doneRound = -1
         self.tournament_type = tournament_type
-        marc = challenger.Challenger("marc", "Xenouvite", "Images/marc.png")
-        marion = challenger.Challenger("marion", "Kiwi", "Images/marion.jpg")
-        chouaps = challenger.Challenger("chouaps", "Chouaps", "Images/chouaps.png")
-        cendrier = challenger.Challenger("cendrier", "Cendrier", "Images/cendrier.png")
-        laure = challenger.Challenger("laure", "Grinty", "Images/laure.png")
-        liza = challenger.Challenger("liza", "Lywell", "Images/liza.jpg")
-        valentin = challenger.Challenger("valentin", "BobLAviateur", "Images/valentin.jpg")
-        matthieu = challenger.Challenger("matthieu", "Turgescence_Incontrolable", "Images/matthieu.jpg")
-        heloise = challenger.Challenger("heloise", "Maywens", "Images/heloise.jpg")
-        tim = challenger.Challenger("tim", "Ancestral", "Images/tim.jpg")
-        lea = challenger.Challenger("lea", "MegaBombasse", "Images/lea.png")
-        theo = challenger.Challenger("theo", "Théo", "Images/theo.jpg")
+        marc = challenger.Challenger("Xenouvite", "Images/marc.png")
+        marion = challenger.Challenger("Kiwi", "Images/marion.png")
+        chouaps = challenger.Challenger("Chouaps", "Images/chouaps.png")
+        cendrier = challenger.Challenger("Cendrier", "Images/cendrier.png")
+        laure = challenger.Challenger("Grinty", "Images/laure.png")
+        liza = challenger.Challenger("Lywell", "Images/liza.png")
+        valentin = challenger.Challenger("BobLAviateur", "Images/valentin.png")
+        matthieu = challenger.Challenger("Turgescence_Incontrolable", "Images/matthieu.png")
+        heloise = challenger.Challenger("Maywens", "Images/heloise.png")
+        tim = challenger.Challenger("Ancestral", "Images/tim.png")
+        lea = challenger.Challenger("MegaBombasse", "Images/lea.png")
+        theo = challenger.Challenger("Théo", "Images/theo.png")
 
         self.challengers_pool = [marc, marion, chouaps, cendrier, liza, laure, valentin, matthieu, heloise, tim, lea,
                                  theo]
@@ -274,4 +276,10 @@ class Tournament:
                     self.challengers_pool[i] = self.challengers_pool[i + 1]
                     self.challengers_pool[i + 1] = tmp
 
-
+    def save_yourself(self):
+        for c in self.challengers_pool:
+            c.unload_image()
+        with open("savegame", "wb") as saveFile:
+            pickle.dump(self, saveFile)
+        for c in self.challengers_pool:
+            c.reload_image()

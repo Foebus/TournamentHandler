@@ -157,24 +157,14 @@ def game_loop(game_state, act_tournament):
             elif event.type == KEYDOWN and event.key == K_INSERT:
                 round_over = True
             elif event.type == KEYDOWN and event.key == K_s:
-                for c in act_tournament.challengers_pool:
-                    c.unload_image()
-                with open("savegame", "wb") as saveFile:
-                    pickle.dump(tournament, saveFile)
-                for c in act_tournament.challengers_pool:
-                    c.reload_image()
+                act_tournament.save_yourself()
         if round_over:
             round_over = False
             actual_challengers = act_tournament.get_next_group()
             if actual_challengers is None:
                 game_state = "gameover"
             else:
-                for c in act_tournament.challengers_pool:
-                    c.unload_image()
-                with open("savegame", "wb") as saveFile:
-                    pickle.dump(tournament, saveFile)
-                for c in act_tournament.challengers_pool:
-                    c.reload_image()
+                act_tournament.save_yourself()
                 height = display_challengers(actual_challengers)
         pygame.time.delay(100)
         loops_in_this_screen += 1

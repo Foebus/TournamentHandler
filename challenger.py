@@ -3,10 +3,10 @@ from pygame.locals import *
 
 
 class Challenger:
-    def __init__(self, real_name, name, image_path, initial_points=0):
+    def __init__(self, name, image_path, initial_points=0):
         self.name = name
-        self.real_name = real_name
-        self.change_image("Images/"+real_name+".png")
+        self.image_path = image_path
+        self.change_image(image_path)
         self.points = initial_points
 
     def rescale_image(self, width, height):
@@ -20,7 +20,7 @@ class Challenger:
         self.image = self.rawImage
 
     def reload_image(self):
-        self.change_image("Images/"+self.real_name+".png")
+        self.change_image(self.image_path)
 
     def unload_image(self):
         self.rawImage = None
