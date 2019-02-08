@@ -190,11 +190,23 @@ pygame.display.set_caption('Challenge en cours')
 #  pygame.mouse.set_visible(0)
 
 if os.path.isfile("savegame"):
-    f = open("savegame", "rb")
-    tournament = pickle.load(f)
-    for c in tournament.challengers_pool:
-        c.reload_image()
-    f.close()
+    pygame.display.set_caption('Sauvegarde trouvée, souhaitez-vous la charger?')
+
+    decision_made = False
+    while not decision_made:
+        events = pygame.event.get()
+        for event in events:
+            if (event.type == KEYDOWN and event.key == K_n) or (event.type == KEYDOWN and event.key == K_ESCAPE):
+                tournament = tournament.Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=8)
+                decision_made = True
+                break
+            elif (event.type == KEYDOWN and event.key == K_y) or (event.type == KEYDOWN and event.key == K_INSERT):
+                f = open("savegame", "rb")
+                tournament = pickle.load(f)
+                for c in tournament.challengers_pool:
+                    c.reload_image()
+                f.close()
+                decision_made = True
 else:
     tournament = tournament.Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=8)
 
