@@ -1,3 +1,4 @@
+# coding=utf-8
 from time import sleep
 
 import pygame
@@ -23,6 +24,9 @@ challenger_rubber = challenger_rubber.convert()
 challenger_rubber.fill((0, 0, 0))
 challengerSurface = pygame.display.set_mode((WIDTH, HEIGHT))
 lightning = pygame.image.load("Images/eclair.png")
+group_name_background = pygame.display.set_mode((WIDTH, FONT_SIZE))
+group_name_background = group_name_background.convert()
+group_name_background.fill((0, 0, 0))
 
 
 def update_score_display(actual_challengers_to_display, act_height):
@@ -36,12 +40,12 @@ def update_score_display(actual_challengers_to_display, act_height):
     font = pygame.font.Font(None, FONT_SIZE)
     challenger_number = actual_challengers_to_display.challengerNumber
     point_rectangles = []  # Rect(0, act_height + FONT_SIZE / 2, WIDTH, FONT_SIZE)
-    pointSurface.blit(point_rubber,  pointSurface.get_rect(left=0, top=POINT_HEIGHT))
+    pointSurface.blit(point_rubber, pointSurface.get_rect(left=0, top=POINT_HEIGHT))
     for i in range(challenger_number):
         point_rectangles.append(Rect((2 * i + 1) * WIDTH / (2 * challenger_number) -
                                      len(str(actual_challengers_to_display.get_points(i))) * FONT_SIZE / 2,
                                      POINT_HEIGHT,
-                                     len(str(actual_challengers_to_display.get_points(i)))*FONT_SIZE,
+                                     len(str(actual_challengers_to_display.get_points(i))) * FONT_SIZE,
                                      FONT_SIZE))
         points = font.render(str(actual_challengers_to_display.get_points(i)), 1, (255, 0, 0))
         point_pos = points.get_rect(centerx=pointSurface.get_width() * (2 * i + 1) / (challenger_number * 2),
@@ -80,11 +84,18 @@ def display_challengers(actual_challengers_to_display):
     update_score_display(actual_challengers_to_display, max_height + FONT_SIZE)
     for i in range(challenger_number - 1):
         challengerSurface.blit(lightning, ((i + 1) * old_width * scale_ratio - lightning.get_width() / 2, 0))
+
     group = font.render(actual_challengers_to_display.title, 1, (255, 241, 0))
 
     text_pos = group.get_rect(centerx=challengerSurface.get_width() / 2,
                               top=5)
+    title_place = Rect(WIDTH / 2 - len(str(actual_challengers_to_display.title)) * FONT_SIZE / 2,
+                       5,
+                       len(str(actual_challengers_to_display.title)) * FONT_SIZE,
+                       FONT_SIZE)
+    challengerSurface.blit(group_name_background, text_pos)
     challengerSurface.blit(group, text_pos)
+    pygame.display.update(title_place)
 
     challengers_rectangle = Rect(0, 0, WIDTH, HEIGHT)
     pygame.display.update(challengers_rectangle)
@@ -107,8 +118,9 @@ def display_winner(ended_tournament):
                          int(act_height * scale_ratio))
     challenger_image = winner.image
     challengerSurface.blit(challenger_image, (0, 0))
-    pseudo = font.render("Bravo, "+winner.name+" pour ta victoire \n\r on peut clairement dire que tu roxes du poney!!",
-                         1, (10, 90, 10))
+    pseudo = font.render(
+        "Bravo, " + winner.name + " pour ta victoire \n\r on peut clairement dire que tu roxes du poney!!",
+        1, (10, 90, 10))
     text_pos = pseudo.get_rect(centerx=windowSurface.get_width() / 2,
                                centery=challenger_image.get_height() - FONT_SIZE * 3)
     challengerSurface.blit(pseudo, text_pos)
@@ -172,9 +184,10 @@ def game_loop(game_state, act_tournament):
     os.remove("savegame")
     # sleep(10000)
 
+
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Challenge en cours')
-pygame.mouse.set_visible(0)
+#  pygame.mouse.set_visible(0)
 
 if os.path.isfile("savegame"):
     f = open("savegame", "rb")
@@ -183,7 +196,7 @@ if os.path.isfile("savegame"):
         c.reload_image()
     f.close()
 else:
-    tournament = tournament.Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=9)
+    tournament = tournament.Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=8)
 
 background = pygame.Surface(screen.get_size())
 background = background.convert()
