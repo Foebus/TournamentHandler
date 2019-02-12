@@ -3,6 +3,7 @@ import pickle
 
 import challenger
 import tree
+import json
 
 
 class Group:
@@ -86,6 +87,8 @@ class Tournament:
         tim = challenger.Challenger("Ancestral", "Images/tim.png")
         lea = challenger.Challenger("MegaBombasse", "Images/lea.png")
         theo = challenger.Challenger("Théo", "Images/theo.png")
+
+        self.challengers = {}
 
         self.challengers_pool = [marc, marion, chouaps, cendrier, liza, laure, valentin, matthieu, heloise, tim, lea,
                                  theo]
@@ -214,7 +217,7 @@ class Tournament:
                     self.pool_round = pre_qualification_nbr
                     return
                 else:
-                    print "I'm not built for this case, handle it yourself!"
+                    print ("I'm not built for this case, handle it yourself!")
             else:
                 for j in range(0, max_authorized - 1, 2):
                     self.ka.add_challenger(self.challengers_pool[j])
@@ -263,6 +266,17 @@ class Tournament:
 
     def extract_from_xml(self, file_path):
         pass
+
+    def extract_from_json(self, file_path):
+        conf_file = open(file_path, 'r')
+        content = json.load(conf_file)
+
+        for c in content["Challengers"]:
+            self.challengers[c["Name"]].append(challenger.Challenger(c["Name"], c["Image"]))
+
+        for g in content["Groups"]:
+            for n in g["Members"]:
+                self.groups[g["Name"]].append(self.challengers[n])
 
     def sort_challengers_by_score(self):
         done = False
