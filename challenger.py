@@ -8,6 +8,8 @@ class Challenger:
         self.image_path = image_path
         self.change_image(image_path)
         self.points = initial_points
+        self.rawImage = pygame.image.load(image_path)
+        self.image = self.rawImage
 
     def rescale_image(self, width, height):
         self.image = pygame.transform.scale(self.rawImage, (width, height))
