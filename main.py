@@ -109,7 +109,7 @@ def display_winner(ended_tournament):
     :param ended_tournament: The tournament where to find the winner
     :type ended_tournament: tournament.Tournament
     """
-    winner = ended_tournament.groups[len(ended_tournament.groups) - 1].get_winner()
+    winner = ended_tournament.groups[len(ended_tournament.groups) - 1].get_winner
     font = pygame.font.Font(None, FONT_SIZE)
     act_width = winner.image.get_width()
     scale_ratio = float(WIDTH) / act_width
@@ -198,6 +198,7 @@ if os.path.isfile("savegame"):
         for event in events:
             if (event.type == KEYDOWN and event.key == K_n) or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 tournament = tournament.Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=8)
+                tournament.extract_from_json("tournament.json")
                 decision_made = True
                 break
             elif (event.type == KEYDOWN and event.key == K_y) or (event.type == KEYDOWN and event.key == K_INSERT):
@@ -209,6 +210,7 @@ if os.path.isfile("savegame"):
                 decision_made = True
 else:
     tournament = tournament.Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=8)
+    tournament.extract_from_json("tournament.json")
 
 background = pygame.Surface(screen.get_size())
 background = background.convert()
