@@ -7,134 +7,112 @@ import json
 
 
 class Group:
+    title: str
+
     def __init__(self, members, title="unnamed"):
         self.challengers = members
         self.challengerNumber = len(members)
-        self.scores = []
+        self.subgroups = {}
+        self.scores = {}
         self.title = title
-        for i in range(self.challengerNumber):
-            self.scores.append(0)
+        self.isOrdered = True
+        for i in self.challengers:
+            self.scores[i] = 0
 
     def give_point(self, challenger_id, point_nbr=1):
-        if challenger_id < self.challengerNumber:
+        """
+        Gives points to a challenger
+        :param challenger_id: the challenger to give points to
+        :param point_nbr: the number of points to give
+        """
+        if challenger_id in self.scores.keys():
             self.scores[challenger_id] += point_nbr
+            self.isOrdered = False
 
     def get_points(self, challenger_id):
-        if challenger_id < self.challengerNumber:
+        """
+        Gets the actual points of a challenger
+        :param challenger_id: The challenger we want the points from
+        :return: His actual number of points
+        """
+        if challenger_id in self.scores.keys():
             return self.scores[challenger_id]
         else:
             return 0
 
+    @property
     def get_winner(self):
         index = 0
-        for i in range(self.challengerNumber):
-            if self.scores[i] > self.scores[index]:
+        for i in self.challengers:
+            if self.scores[i] > self.scores[i]:
                 index = i
         return self.challengers[index]
 
+    @property
     def get_loser(self):
         index = 0
-        for i in range(self.challengerNumber):
+        for i in self.challengers:
             if self.scores[i] < self.scores[index]:
                 index = i
         return self.challengers[index]
 
     def sort_challengers_by_points(self):
-        order = []
-        for i in range(self.challengerNumber):
-            order.append(i)
-        smthng_changed = True
-        while smthng_changed:
-            smthng_changed = False
-            for i in range(self.challengerNumber - 1):
-                if self.scores[i] < self.scores[i + 1]:
-                    tmp = self.scores[i]
-                    tmp_ord = order[i]
-                    self.scores[i] = self.scores[i + 1]
-                    order[i] = order[i + 1]
-                    self.scores[i + 1] = tmp
-                    order[i + 1] = tmp_ord
-                    smthng_changed = True
-        tmp_challengers = []
-        for i in range(self.challengerNumber):
-            tmp_challengers.append(self.challengers[i])
-        for i in range(self.challengerNumber):
-            self.challengers[i] = tmp_challengers[order[i]]
+        if not self.isOrdered:
+            order = []
+            for k, i in self.scores:
+                order.append((i, k))
+            order.sort()
+
+            tmp_challengers = []
+            for i in self.challengers:
+                tmp_challengers.append(i)
+            for i in order:
+                self.challengers[i] = tmp_challengers[i[1]]
+            self.isOrdered = True
         return self.challengers
 
     def add_challenger(self, new_challenger, initialscore=0):
         self.challengers.append(new_challenger)
         self.challengerNumber += 1
-        self.scores.append(initialscore)
+        self.scores[new_challenger] = initialscore
+        self.isOrdered = initialscore == 0
 
     def remove_challenger(self, old_challenger):
         self.challengers.remove(old_challenger)
+
+    def get_title(self):
+        return self.title
+
+    def add_subgroup(self, new_subgroup):
+        """
+
+        :type new_subgroup: Group
+        """
+        self.subgroups[new_subgroup.get_title] = new_subgroup
+
+    def get_subgroups(self):
+        if len(self.subgroups) > 0:
+            return self.subgroups
+        else:
+            return None
 
 
 class Tournament:
     def __init__(self, tournament_type="elimination directe", pool_rounds=0):
         self.doneRound = -1
         self.tournament_type = tournament_type
-        marc = challenger.Challenger("Xenouvite", "Images/marc.png")
-        marion = challenger.Challenger("Kiwi", "Images/marion.png")
-        chouaps = challenger.Challenger("Chouaps", "Images/chouaps.png")
-        cendrier = challenger.Challenger("Cendrier", "Images/cendrier.png")
-        laure = challenger.Challenger("Grinty", "Images/laure.png")
-        liza = challenger.Challenger("Lywell", "Images/liza.png")
-        valentin = challenger.Challenger("BobLAviateur", "Images/valentin.png")
-        matthieu = challenger.Challenger("Turgescence_Incontrolable", "Images/matthieu.png")
-        heloise = challenger.Challenger("Maywens", "Images/heloise.png")
-        tim = challenger.Challenger("Ancestral", "Images/tim.png")
-        lea = challenger.Challenger("MegaBombasse", "Images/lea.png")
-        theo = challenger.Challenger("Théo", "Images/theo.png")
-
         self.challengers = {}
-
-        self.challengers_pool = [marc, marion, chouaps, cendrier, liza, laure, valentin, matthieu, heloise, tim, lea,
-                                 theo]
+        self.challengers_pool = []
         self.pool_round = pool_rounds
         self.ka = Group([], "Demi-Finale")
         self.ki = Group([], "Demi-Finale")
         self.igitsa = Group([], "Finale")
         self.calif = []
+        self.groups = []
         self.tournament_tree = tree.Tree(initial_value=self.igitsa, depth=5)
         self.tournament_tree.get_root().add_child(self.ki)
         self.tournament_tree.get_root().add_child(self.ka)
         self.rattrapages = Group([], "Rattrapages")
-        if tournament_type == "elimination directe":
-            self.alpha = Group([marion, liza], "alpha")
-            self.beta = Group([matthieu, laure], "beta")
-            self.delta = Group([heloise, cendrier], "delta")
-            self.gamma = Group([chouaps, tim], "gamma")
-            self.epsilon = Group([valentin, marc], "epsilon")
-            self.alif = Group([], "alif")
-            self.ba = Group([], "ba")
-            self.ta = Group([lea], "ta")
-            self.groups = [self.alpha, self.beta, self.delta, self.gamma, self.epsilon, self.rattrapages, self.alif,
-                           self.ba, self.ta, self.ka, self.ki, self.igitsa]
-            self.tournament_tree.search_node(self.ki)[0].add_child(self.rattrapages)
-            self.tournament_tree.search_node(self.ka)[0].add_child(self.alif)
-            self.tournament_tree.search_node(self.ka)[0].add_child(self.ta)
-            self.tournament_tree.search_node(self.ki)[0].add_child(self.ba)
-
-            self.tournament_tree.search_node(self.alif)[0].add_child(self.alpha)
-            self.tournament_tree.search_node(self.alif)[0].add_child(self.gamma)
-            self.tournament_tree.search_node(self.ta)[0].add_child(self.beta)
-            self.tournament_tree.search_node(self.ba)[0].add_child(self.epsilon)
-            self.tournament_tree.search_node(self.ba)[0].add_child(self.delta)
-
-        else:
-            self.beta = Group([liza, laure], "Pool renard")
-            self.ta = Group([laure, theo, liza, cendrier], "Pool et pill")
-            self.gamma = Group([chouaps, theo], "Pool d'eau")
-            self.alpha = Group([marion, lea], "Pool coq")
-            self.epsilon = Group([valentin, tim], "Pool ayer")
-            self.delta = Group([matthieu, cendrier], "Pool ai piou, piou, piou")
-            self.iota = Group([heloise, marc], "Pool ai piou, piou, piou")
-            self.alif = Group([lea, tim, valentin, heloise], "Pool liche")
-            self.ba = Group([marc, matthieu, marion, chouaps], "Pool, the swimming one")
-            self.groups = [self.alpha, self.beta, self.delta, self.gamma, self.epsilon, self.alif,
-                           self.ba, self.ta, self.iota, self.ka, self.ki, self.igitsa]
 
     def handle_qualifications(self, max_authorized=4):
         if not self.calif:
@@ -217,7 +195,7 @@ class Tournament:
                     self.pool_round = pre_qualification_nbr
                     return
                 else:
-                    print ("I'm not built for this case, handle it yourself!")
+                    print("I'm not built for this case, handle it yourself!")
             else:
                 for j in range(0, max_authorized - 1, 2):
                     self.ka.add_challenger(self.challengers_pool[j])
@@ -241,8 +219,8 @@ class Tournament:
                 if self.tournament_type == "elimination directe":
                     node = self.tournament_tree.search_node(self.groups[self.doneRound])[0]
                     if node.get_parent() is not None:
-                        node.get_parent().get_value().add_challenger(node.get_value().get_winner())
-                        self.rattrapages.add_challenger(node.get_value().get_loser())
+                        node.get_parent().get_value().add_challenger(node.get_value().get_winner)
+                        self.rattrapages.add_challenger(node.get_value().get_loser)
                 elif self.tournament_type == "deux_tours_pool_plus_qualif":
                     self.groups[self.doneRound].sort_challengers_by_points()
                     self.groups[self.doneRound].challengers[0].add_points(4 -
@@ -253,7 +231,7 @@ class Tournament:
                     if self.doneRound == self.pool_round-1:
                         self.handle_qualifications()
                 elif self.tournament_type == "deux_parmi_trois":
-                    self.groups[self.doneRound].remove_challenger(self.groups[self.doneRound].get_loser())
+                    self.groups[self.doneRound].remove_challenger(self.groups[self.doneRound].get_loser)
                     if self.doneRound == self.pool_round-1:
                         self.distribute_challengers()
             self.doneRound += 1
@@ -264,19 +242,42 @@ class Tournament:
     def get_rounds(self):
         return self.doneRound
 
-    def extract_from_xml(self, file_path):
-        pass
-
     def extract_from_json(self, file_path):
         conf_file = open(file_path, 'r')
         content = json.load(conf_file)
 
+        self.tournament_type = content["Tournament type"]
+
         for c in content["Challengers"]:
+            self.challengers[c["Name"]] = []
             self.challengers[c["Name"]].append(challenger.Challenger(c["Name"], c["Image"]))
 
         for g in content["Groups"]:
+            act_name = g["Name"]
+            #  TODO: change that condition to make it correct
+            if act_name not in self.groups:
+                self.groups[act_name] = Group([], act_name)
             for n in g["Members"]:
-                self.groups[g["Name"]].append(self.challengers[n])
+                self.groups[act_name].add_challenger(self.challengers[n])
+            for n in g["SubGroup"]:
+                self.groups[act_name].add_subgroup(self.groups[n])
+            if g["Final"] is not None:
+                self.tournament_tree = tree.Tree(initial_value=self.groups[act_name])
+
+        root_group = self.tournament_tree.get_root()
+        elem = {root_group: [root_group.get_subgroups]}
+        passed_elem = []
+        while len(elem) > 0:
+            for p, g in elem:
+                for e in g:
+                    if e not in passed_elem:
+                        p.add_child(e)
+                        if e.get_subgroups() is not None:
+                            elem[e] = e.get_subgroups()
+                passed_elem.append(p)
+                elem.pop(p)
+
+        self.challengers_pool = self.challengers.values()
 
     def sort_challengers_by_score(self):
         done = False
