@@ -35,7 +35,7 @@ def update_score_display(actual_challengers_to_display, act_height):
     :param act_height: The height of the lowest image
     :type act_height: int
     :param actual_challengers_to_display: The group of challengers whose name to display
-    :type actual_challengers_to_display: tournament.Group
+    :type actual_challengers_to_display: TournamentGroup.Group
     """
     font = pygame.font.Font(None, FONT_SIZE)
     challenger_number = actual_challengers_to_display.challengerNumber
@@ -58,7 +58,7 @@ def display_challengers(actual_challengers_to_display):
     """
 
     :param actual_challengers_to_display: the challenger group to display
-    :type actual_challengers_to_display: tournament.Group
+    :type actual_challengers_to_display: TournamentGroup.Group
     """
     font = pygame.font.Font(None, FONT_SIZE)
     challenger_number = actual_challengers_to_display.challengerNumber
