@@ -88,7 +88,7 @@ class Group:
 
         :type new_subgroup: Group
         """
-        self.subgroups[new_subgroup.get_title] = new_subgroup
+        self.subgroups[new_subgroup.get_title()] = new_subgroup
 
     def get_subgroups(self):
         if len(self.subgroups) > 0:
@@ -249,34 +249,51 @@ class Tournament:
         self.tournament_type = content["Tournament type"]
 
         for c in content["Challengers"]:
-            self.challengers[c["Name"]] = []
-            self.challengers[c["Name"]].append(challenger.Challenger(c["Name"], c["Image"]))
+            self.challengers[c["Name"]] = challenger.Challenger(c["Name"], c["Image"])
 
         for g in content["Groups"]:
             act_name = g["Name"]
-            #  TODO: change that condition to make it correct
-            if act_name not in self.groups:
-                self.groups[act_name] = Group([], act_name)
+            if not any(group.get_title() == act_name for group in self.groups):
+                self.groups.append(Group([], act_name))
+
+            # Find matching index
+            for i, group in enumerate(self.groups):
+                if group.get_title() == act_name:
+                    break
+
             for n in g["Members"]:
-                self.groups[act_name].add_challenger(self.challengers[n])
+                self.groups[i].add_challenger(self.challengers[n])
             for n in g["SubGroup"]:
-                self.groups[act_name].add_subgroup(self.groups[n])
-            if g["Final"] is not None:
-                self.tournament_tree = tree.Tree(initial_value=self.groups[act_name])
+                for k, group in enumerate(self.groups):
+                    if group.get_title() == n:
+                        break
+                self.groups[i].add_subgroup(self.groups[k])
+            if "Final" in g:
+                self.tournament_tree = tree.Tree(initial_value=self.groups[i])
 
         root_group = self.tournament_tree.get_root()
-        elem = {root_group: [root_group.get_subgroups]}
+        elem = {root_group: root_group.get_value().get_subgroups()}
+        future_elem = {}
         passed_elem = []
+        d = 0
         while len(elem) > 0:
-            for p, g in elem:
+            for p, g in elem.items():
                 for e in g:
+                    for group in self.groups:
+                        if group.get_title() == e:
+                            e = group
+                            break
                     if e not in passed_elem:
-                        p.add_child(e)
+                        new_node = p.add_child(e)
                         if e.get_subgroups() is not None:
-                            elem[e] = e.get_subgroups()
+                            future_elem[new_node] = e.get_subgroups()
                 passed_elem.append(p)
-                elem.pop(p)
+            elem = future_elem
+            future_elem = {}
+            d += 1
 
+        self.tournament_tree.depth = d
+        # self.tournament_tree.print()
         self.challengers_pool = self.challengers.values()
 
     def sort_challengers_by_score(self):
