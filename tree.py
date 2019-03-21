@@ -37,6 +37,22 @@ class Tree:
                 act_branch[act_depth] += 1
         return result
 
+    def print(self):
+        act_depth = [self.root]
+        incomming_depth = []
+        formatter = [4*self.depth]
+        while len(act_depth) > 0:
+            line = ""
+            for n in act_depth:
+                p = formatter.pop(0)
+                line += "\t"*int(p) + str(n.get_value().get_title())
+                for i, c in enumerate(n.get_children()):
+                    incomming_depth.append(c)
+                    formatter.append(p - len(n.get_children())*2 + 2*i)
+            act_depth = incomming_depth
+            print(line+"\n")
+            incomming_depth = []
+
 
 class Node:
     def __init__(self, parent, initial_value=None):
@@ -46,6 +62,7 @@ class Node:
 
     def add_child(self, child_value):
         self.children.append(Node(self, child_value))
+        return self.children[len(self.children)-1]
 
     def get_children(self):
         return self.children
