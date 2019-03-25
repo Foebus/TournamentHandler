@@ -25,6 +25,69 @@ class Tournament:
         self.tournament_tree.get_root().add_child(self.ka)
         self.rattrapages = Group([], "Rattrapages")
 
+    def handle_even_places_to_fill(self, places_to_fill, people_who_want_it, max_authorized):
+        if places_to_fill % 2 == 0:
+            pre_qualification_nbr = (people_who_want_it / places_to_fill) / 2
+            sub_calif_groups = []
+            for i in range(0, pre_qualification_nbr, 2):
+                sub_calif_groups.append(Group([], "Qualification"))
+                sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
+                                                                         places_to_fill + i])
+                sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
+                                                                         places_to_fill + i + 1])
+                if i % 2 == 0:
+                    self.tournament_tree.search_node(self.ki)[0].add_child(sub_calif_groups[i])
+                else:
+                    self.tournament_tree.search_node(self.ka)[0].add_child(sub_calif_groups[i])
+                self.calif.append(sub_calif_groups[i])
+        else:
+            pre_qualification_nbr = (people_who_want_it / places_to_fill) / 2
+            sub_calif_groups = []
+            calif_groups = []
+            for i in range(max(pre_qualification_nbr / 2, 1)):
+                calif_groups.append(Group([], "Qualification, deuxième fournée"))
+                if i % 2 == 0:
+                    self.tournament_tree.search_node(self.ki)[0].add_child(calif_groups[i])
+                else:
+                    self.tournament_tree.search_node(self.ka)[0].add_child(calif_groups[i])
+                self.calif.append(calif_groups[i])
+            for i in range(pre_qualification_nbr):
+                sub_calif_groups.append(Group([], "Qualification, " + str(people_who_want_it) +
+                                              " challengers se disputent " + str(places_to_fill) + " places"))
+                sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
+                                                                         places_to_fill + i * 2])
+                sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
+                                                                         places_to_fill + i * 2 + 1])
+
+                self.tournament_tree.search_node(calif_groups[i % len(calif_groups)])[0].add_child(
+                    sub_calif_groups[i])
+                self.calif.insert(0, sub_calif_groups[i])
+
+    def handle_multiples_three_who_want_it(self, places_to_fill, people_who_want_it, max_authorized):
+        pre_qualification_nbr = people_who_want_it / 3
+        calif_groups = []
+        for i in range(pre_qualification_nbr):
+            calif_groups.append(Group([], "Qualification, " + str(people_who_want_it) +
+                                          " challengers se disputent " + str(places_to_fill) +" places"))
+            if i % 2 == 0:
+                self.tournament_tree.search_node(self.ki)[0].add_child(calif_groups[i])
+            else:
+                self.tournament_tree.search_node(self.ka)[0].add_child(calif_groups[i])
+            self.calif.append(calif_groups[i])
+            calif_groups[i].add_challenger(self.challengers_pool[max_authorized - places_to_fill + i * 3])
+            calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
+                                                                 places_to_fill + i * 3 + 1])
+            calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
+                                                                 places_to_fill + i * 3 + 2])
+        self.calif.append(self.ka)
+        self.calif.append(self.ki)
+        self.calif.append(self.igitsa)
+        self.groups = self.calif
+        self.doneRound = -1
+
+        self.tournament_type = "deux_parmi_trois"
+        self.pool_round = pre_qualification_nbr
+
     def handle_qualifications(self, max_authorized=4):
         if not self.calif:
             self.sort_challengers_by_score()
@@ -44,66 +107,9 @@ class Tournament:
                     else:
                         self.ki.add_challenger(self.challengers_pool[i])
                 if (people_who_want_it / places_to_fill) % 2 == 0 and places_to_fill <= 4:
-                    if places_to_fill % 2 == 0:
-                        pre_qualification_nbr = (people_who_want_it / places_to_fill) / 2
-                        sub_calif_groups = []
-                        for i in range(0, pre_qualification_nbr, 2):
-                            sub_calif_groups.append(Group([], "Qualification"))
-                            sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
-                                                                                     places_to_fill + i])
-                            sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
-                                                                                     places_to_fill + i + 1])
-                            if i % 2 == 0:
-                                self.tournament_tree.search_node(self.ki)[0].add_child(sub_calif_groups[i])
-                            else:
-                                self.tournament_tree.search_node(self.ka)[0].add_child(sub_calif_groups[i])
-                            self.calif.append(sub_calif_groups[i])
-                    else:
-                        pre_qualification_nbr = (people_who_want_it / places_to_fill) / 2
-                        sub_calif_groups = []
-                        calif_groups = []
-                        for i in range(max(pre_qualification_nbr / 2, 1)):
-                            calif_groups.append(Group([], "Qualification, deuxième fournée"))
-                            if i % 2 == 0:
-                                self.tournament_tree.search_node(self.ki)[0].add_child(calif_groups[i])
-                            else:
-                                self.tournament_tree.search_node(self.ka)[0].add_child(calif_groups[i])
-                            self.calif.append(calif_groups[i])
-                        for i in range(pre_qualification_nbr):
-                            sub_calif_groups.append(Group([], "Qualification, " + str(people_who_want_it) +
-                                                          " challengers se disputent " + str(places_to_fill) +" places"))
-                            sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
-                                                                                     places_to_fill + i * 2])
-                            sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
-                                                                                     places_to_fill + i * 2 + 1])
-
-                            self.tournament_tree.search_node(calif_groups[i % len(calif_groups)])[0].add_child(
-                                sub_calif_groups[i])
-                            self.calif.insert(0, sub_calif_groups[i])
+                    self.handle_even_places_to_fill(places_to_fill, people_who_want_it, max_authorized)
                 elif people_who_want_it % 3 == 0 and places_to_fill % 2 == 0:
-                    pre_qualification_nbr = people_who_want_it / 3
-                    calif_groups = []
-                    for i in range(pre_qualification_nbr):
-                        calif_groups.append(Group([], "Qualification, " + str(people_who_want_it) +
-                                                      " challengers se disputent " + str(places_to_fill) +" places"))
-                        if i % 2 == 0:
-                            self.tournament_tree.search_node(self.ki)[0].add_child(calif_groups[i])
-                        else:
-                            self.tournament_tree.search_node(self.ka)[0].add_child(calif_groups[i])
-                        self.calif.append(calif_groups[i])
-                        calif_groups[i].add_challenger(self.challengers_pool[max_authorized - places_to_fill + i * 3])
-                        calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
-                                                                             places_to_fill + i * 3 + 1])
-                        calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
-                                                                             places_to_fill + i * 3 + 2])
-                    self.calif.append(self.ka)
-                    self.calif.append(self.ki)
-                    self.calif.append(self.igitsa)
-                    self.groups = self.calif
-                    self.doneRound = -1
-
-                    self.tournament_type = "deux_parmi_trois"
-                    self.pool_round = pre_qualification_nbr
+                    self.handle_multiples_three_who_want_it(places_to_fill, people_who_want_it, max_authorized)
                     return
                 else:
                     print("I'm not built for this case, handle it yourself!")
@@ -157,11 +163,14 @@ class Tournament:
         conf_file = open(file_path, 'r')
         content = json.load(conf_file)
 
+        #  Get the type of the tournament
         self.tournament_type = content["Tournament type"]
 
+        #  Get the challenger names
         for c in content["Challengers"]:
             self.challengers[c["Name"]] = challenger.Challenger(c["Name"], c["Image"])
 
+        #  Then get the groups, fill those as well as the subgroups
         for g in content["Groups"]:
             act_name = g["Name"]
             if not any(group.get_title() == act_name for group in self.groups):
@@ -182,6 +191,7 @@ class Tournament:
             if "Final" in g:
                 self.tournament_tree = tree.Tree(initial_value=self.groups[i])
 
+        #  Then create the tournament tree
         root_group = self.tournament_tree.get_root()
         elem = {root_group: root_group.get_value().get_subgroups()}
         future_elem = {}
