@@ -16,6 +16,33 @@ class Tree:
             act_branch.append(0)
         done = False
         tmp = self.root
+        while not done:
+            if tmp.get_value() == value:
+                return tmp
+            if act_depth < self.depth and act_branch[act_depth] < tmp.get_children_nbr():
+                tmp = tmp.get_child(act_branch[act_depth])
+                act_depth += 1
+            else:
+                act_branch[act_depth] = 0
+                act_depth -= 1
+                tmp = tmp.get_parent()
+                if tmp is None:
+                    done = True
+                else:
+                    while act_branch[act_depth] >= tmp.get_children_nbr():
+                        act_branch[act_depth] = 0
+                        tmp = tmp.get_parent()
+                        act_depth -= 1
+                act_branch[act_depth] += 1
+        return None
+
+    def search_nodes(self, value):
+        act_depth = 0
+        act_branch = []
+        for k in range(self.depth):
+            act_branch.append(0)
+        done = False
+        tmp = self.root
         result = []
         while not done:
             if tmp.get_value() == value:
