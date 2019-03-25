@@ -34,32 +34,36 @@ class Group:
 
     @property
     def get_winner(self):
-        index = 0
-        for i in self.challengers:
-            if self.scores[i] > self.scores[i]:
-                index = i
-        return self.challengers[index]
+        if self.isOrdered:
+            return self.challengers[0]
+        else:
+            index = self.challengers[0]
+            for i in self.challengers:
+                if self.scores[i] > self.scores[index]:
+                    index = i
+            return index
 
     @property
     def get_loser(self):
-        index = 0
-        for i in self.challengers:
-            if self.scores[i] < self.scores[index]:
-                index = i
-        return self.challengers[index]
+        if self.isOrdered:
+            return self.challengers[len(self.challengers)-1]
+        else:
+            index = self.challengers[0]
+            for i in self.challengers:
+                if self.scores[i] < self.scores[index]:
+                    index = i
+            return index
 
     def sort_challengers_by_points(self):
         if not self.isOrdered:
             order = []
-            for k, i in self.scores:
+            for k, i in self.scores.items():
                 order.append((i, k))
             order.sort()
 
-            tmp_challengers = []
-            for i in self.challengers:
-                tmp_challengers.append(i)
-            for i in order:
-                self.challengers[i] = tmp_challengers[i[1]]
+            nb = len(self.challengers)
+            for i, d in enumerate(order):
+                self.challengers[nb - i - 1] = d[1]
             self.isOrdered = True
         return self.challengers
 
