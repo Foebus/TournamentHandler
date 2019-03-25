@@ -1,18 +1,21 @@
 import pygame
-from pygame.locals import *
 
 
 class Challenger:
     def __init__(self, name, image_path, initial_points=0):
         self.name = name
         self.image_path = image_path
-        self.change_image(image_path)
         self.points = initial_points
-        self.rawImage = pygame.image.load(image_path)
-        self.image = self.rawImage
+        try:
+            self.rawImage = pygame.image.load(image_path)
+            self.image = self.rawImage
+        except:
+            self.rawImage = None
+            self.image = None
 
     def rescale_image(self, width, height):
-        self.image = pygame.transform.scale(self.rawImage, (width, height))
+        if self.image is not None:
+            self.image = pygame.transform.scale(self.rawImage, (width, height))
 
     def add_points(self, value):
         self.points += value
