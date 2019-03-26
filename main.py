@@ -108,7 +108,7 @@ def display_winner(ended_tournament):
     :param ended_tournament: The tournament where to find the winner
     :type ended_tournament: tournament.Tournament
     """
-    winner = ended_tournament.groups[len(ended_tournament.groups) - 1].get_winner
+    winner = ended_tournament.groups[len(ended_tournament.groups) - 1].winner
     font = pygame.font.Font(None, FONT_SIZE)
     act_width = winner.image.get_width()
     scale_ratio = float(WIDTH) / act_width

@@ -42,7 +42,7 @@ class Group:
             return 0
 
     @property
-    def get_winner(self):
+    def winner(self):
         if self.isOrdered:
             return self.challengers[0]
         else:
@@ -53,7 +53,7 @@ class Group:
             return index
 
     @property
-    def get_loser(self):
+    def loser(self):
         if self.isOrdered:
             return self.challengers[len(self.challengers)-1]
         else:

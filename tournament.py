@@ -154,8 +154,8 @@ class Tournament:
                 if self.tournament_type == "elimination directe":
                     node = self.tournament_tree.search_node(self.groups[self.doneRound])[0]
                     if node.get_parent() is not None:
-                        node.get_parent().get_value().add_challenger(node.get_value().get_winner)
-                        self.rattrapages.add_challenger(node.get_value().get_loser)
+                        node.get_parent().get_value().add_challenger(node.get_value().winner)
+                        self.rattrapages.add_challenger(node.get_value().loser)
                 elif self.tournament_type == "deux_tours_pool_plus_qualif":
                     self.groups[self.doneRound].sort_challengers_by_points()
                     self.groups[self.doneRound].challengers[0].add_points(4 -
@@ -166,7 +166,7 @@ class Tournament:
                     if self.doneRound == self.pool_round-1:
                         self.handle_qualifications()
                 elif self.tournament_type == "deux_parmi_trois":
-                    self.groups[self.doneRound].remove_challenger(self.groups[self.doneRound].get_loser)
+                    self.groups[self.doneRound].remove_challenger(self.groups[self.doneRound].loser)
                     if self.doneRound == self.pool_round-1:
                         self.distribute_challengers()
             self.doneRound += 1
