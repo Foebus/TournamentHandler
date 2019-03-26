@@ -37,7 +37,7 @@ def update_score_display(actual_challengers_to_display, act_height):
     :type actual_challengers_to_display: TournamentGroup.Group
     """
     font = pygame.font.Font(None, FONT_SIZE)
-    challenger_number = actual_challengers_to_display.challengerNumber
+    challenger_number = actual_challengers_to_display.challenger_number
     point_rectangles = []  # Rect(0, act_height + FONT_SIZE / 2, WIDTH, FONT_SIZE)
     pointSurface.blit(point_rubber, pointSurface.get_rect(left=0, top=POINT_HEIGHT))
     for i in range(challenger_number):
@@ -60,7 +60,7 @@ def display_challengers(actual_challengers_to_display):
     :type actual_challengers_to_display: TournamentGroup.Group
     """
     font = pygame.font.Font(None, FONT_SIZE)
-    challenger_number = actual_challengers_to_display.challengerNumber
+    challenger_number = actual_challengers_to_display.challenger_number
     challengerSurface.blit(challenger_rubber, (0, 0))
     max_height = 0
     old_width = 0

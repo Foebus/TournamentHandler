@@ -159,10 +159,10 @@ class Tournament:
                 elif self.tournament_type == "deux_tours_pool_plus_qualif":
                     self.groups[self.doneRound].sort_challengers_by_points()
                     self.groups[self.doneRound].challengers[0].add_points(4 -
-                                                                          self.groups[self.doneRound].challengerNumber)
-                    for k in range(self.groups[self.doneRound].challengerNumber):
+                                                                          self.groups[self.doneRound].challenger_number)
+                    for k in range(self.groups[self.doneRound].challenger_number):
                         self.challengers_pool[self.challengers_pool.index(self.groups[self.doneRound].challengers[k])] \
-                            .add_points(self.groups[self.doneRound].challengerNumber - k)
+                            .add_points(self.groups[self.doneRound].challenger_number - k)
                     if self.doneRound == self.pool_round-1:
                         self.handle_qualifications()
                 elif self.tournament_type == "deux_parmi_trois":
