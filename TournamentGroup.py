@@ -36,6 +36,9 @@ class Group:
         if challenger_id in self.scores.keys():
             return self.scores[challenger_id]
         else:
+            for i, c in enumerate(self.challengers):
+                if i == challenger_id:
+                    return self.scores[c]
             return 0
 
     @property
