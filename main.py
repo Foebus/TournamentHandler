@@ -1,9 +1,8 @@
 # coding=utf-8
-from time import sleep
 
 import pygame
 import sys
-import tournament
+from tournament import Tournament, Group
 import pickle
 import os.path
 from pygame.locals import *
@@ -173,7 +172,7 @@ def game_loop(game_state, act_tournament):
             elif event.type == MOUSEBUTTONUP:
                 (x, y) = pygame.mouse.get_pos()
                 (w, h) = pygame.display.get_surface().get_size()
-                i = int(x * len(actual_challengers.challengers) / w)
+                i = int(x * actual_challengers.challengerNumber / w)
                 actual_challengers.give_point(i)
                 update_score_display(actual_challengers, height)
         if round_over:
@@ -203,7 +202,7 @@ if os.path.isfile("savegame"):
         events = pygame.event.get()
         for event in events:
             if (event.type == KEYDOWN and event.key == K_n) or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                tournament = tournament.Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=8)
+                tournament = Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=8)
                 tournament.extract_from_json("tournament.json")
                 decision_made = True
                 break
@@ -215,7 +214,7 @@ if os.path.isfile("savegame"):
                 f.close()
                 decision_made = True
 else:
-    tournament = tournament.Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=8)
+    tournament = Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=8)
     tournament.extract_from_json("tournament.json")
 
 background = pygame.Surface(screen.get_size())
