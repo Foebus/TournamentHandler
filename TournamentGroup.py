@@ -20,6 +20,12 @@ class Group:
         if challenger_id in self.scores.keys():
             self.scores[challenger_id] += point_nbr
             self.isOrdered = False
+        else:
+            for i, c in enumerate(self.challengers):
+                if i == challenger_id:
+                    self.scores[c] += point_nbr
+                    self.isOrdered = False
+                    break
 
     def get_points(self, challenger_id):
         """
