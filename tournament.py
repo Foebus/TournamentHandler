@@ -1,5 +1,6 @@
 # coding=utf-8
 import pickle
+from typing import Optional
 
 import challenger
 import tree
@@ -26,6 +27,7 @@ class Tournament:
         self.rattrapages = Group([], "Rattrapages")
 
     def handle_even_places_to_fill(self, places_to_fill, people_who_want_it, max_authorized):
+        # TODO : clean, refactor and refactor this code
         if places_to_fill % 2 == 0:
             pre_qualification_nbr = (people_who_want_it / places_to_fill) / 2
             sub_calif_groups = []
@@ -64,11 +66,12 @@ class Tournament:
                 self.calif.insert(0, sub_calif_groups[i])
 
     def handle_multiples_three_who_want_it(self, places_to_fill, people_who_want_it, max_authorized):
+        # TODO : clean, refactor and refactor this code
         pre_qualification_nbr = people_who_want_it / 3
         calif_groups = []
         for i in range(pre_qualification_nbr):
             calif_groups.append(Group([], "Qualification, " + str(people_who_want_it) +
-                                          " challengers se disputent " + str(places_to_fill) +" places"))
+                                          " challengers se disputent " + str(places_to_fill) + " places"))
             if i % 2 == 0:
                 self.tournament_tree.search_node(self.ki)[0].add_child(calif_groups[i])
             else:
@@ -88,7 +91,12 @@ class Tournament:
         self.tournament_type = "deux_parmi_trois"
         self.pool_round = pre_qualification_nbr
 
-    def handle_qualifications(self, max_authorized=4):
+    def handle_qualifications(self, max_authorized=4) -> None:
+        # TODO : clean, refactor and refactor this code
+        """
+            Handles the qualification until the point where there are almost no more challengers
+        :param max_authorized: The max number of people to let go after this qualification phase
+        """
         if not self.calif:
             self.sort_challengers_by_score()
 
@@ -101,11 +109,14 @@ class Tournament:
                 while self.challengers_pool[max_authorized - places_to_fill].points == \
                         self.challengers_pool[max_authorized - places_to_fill + people_who_want_it].points:
                     people_who_want_it += 1
+
                 for i in range(max_authorized - places_to_fill):
                     if i % 2 == 0:
                         self.ka.add_challenger(self.challengers_pool[i])
                     else:
                         self.ki.add_challenger(self.challengers_pool[i])
+
+                #  Handles the qualification depending from the analysed conditions
                 if (people_who_want_it / places_to_fill) % 2 == 0 and places_to_fill <= 4:
                     self.handle_even_places_to_fill(places_to_fill, people_who_want_it, max_authorized)
                 elif people_who_want_it % 3 == 0 and places_to_fill % 2 == 0:
@@ -125,12 +136,19 @@ class Tournament:
             self.tournament_type = "elimination directe"
 
     def distribute_challengers(self):
+        """
+            Add challengers from the pool rounds into direct elimination part of the tree and change mode
+        """
         for i in range(self.pool_round):
             self.ka.add_challenger(self.groups[i].challengers[0])
             self.ki.add_challenger(self.groups[i].challengers[1])
         self.tournament_type = "elimination directe"
 
-    def get_next_group(self):
+    def get_next_group(self) -> Optional[Group]:
+        """
+            Get the next group in the tournament tree
+        :return: the next playing group
+        """
         if self.doneRound < len(self.groups) - 1:
             if self.doneRound >= 0:
                 if self.tournament_type == "elimination directe":
@@ -159,7 +177,11 @@ class Tournament:
     def get_rounds(self):
         return self.doneRound
 
-    def extract_from_json(self, file_path):
+    def extract_from_json(self, file_path: str) -> None:
+        """
+            Extract the configuration of a tournament and all its objects (challengers and groups) from a specified json
+        :param file_path: string specifying where to find the configuration json
+        """
         conf_file = open(file_path, 'r')
         content = json.load(conf_file)
 
@@ -217,7 +239,10 @@ class Tournament:
         # self.tournament_tree.print()
         self.challengers_pool = self.challengers.values()
 
-    def sort_challengers_by_score(self):
+    def sort_challengers_by_score(self) -> None:
+        """
+            Sorts the challengers based on their actual score
+        """
         done = False
 
         while not done:
@@ -230,6 +255,9 @@ class Tournament:
                     self.challengers_pool[i + 1] = tmp
 
     def save_yourself(self):
+        """
+            Saves the actual state of the game into a file named "savegame"
+        """
         for c in self.challengers_pool:
             c.unload_image()
         with open("savegame", "wb") as saveFile:
