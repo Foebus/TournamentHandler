@@ -170,6 +170,12 @@ def game_loop(game_state, act_tournament):
                 round_over = True
             elif event.type == KEYDOWN and event.key == K_s:
                 act_tournament.save_yourself()
+            elif event.type == MOUSEBUTTONUP:
+                (x, y) = pygame.mouse.get_pos()
+                (w, h) = pygame.display.get_surface().get_size()
+                i = int(x * len(actual_challengers.challengers) / w)
+                actual_challengers.give_point(i)
+                update_score_display(actual_challengers, height)
         if round_over:
             round_over = False
             actual_challengers = act_tournament.get_next_group()
