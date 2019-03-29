@@ -11,8 +11,9 @@ from TournamentGroup import Group
 
 class Tournament:
     def __init__(self, tournament_type="elimination directe", pool_rounds=0):
-        self.doneRound = -1
+        self.actual_round = -1
         self.tournament_type = tournament_type
+        self.actual_group = None
         self.challengers = {}
         self.challengers_pool = []
         self.pool_round = pool_rounds
@@ -26,17 +27,15 @@ class Tournament:
         self.tournament_tree.get_root().add_child(self.ka)
         self.rattrapages = Group([], "Rattrapages")
 
-    def handle_even_places_to_fill(self, places_to_fill, people_who_want_it, max_authorized):
+    def __handle_even_places_to_fill(self, places_to_fill, people_who_want_it, max_authorized):
         # TODO : clean, refactor and refactor this code
         if places_to_fill % 2 == 0:
             pre_qualification_nbr = (people_who_want_it / places_to_fill) / 2
             sub_calif_groups = []
             for i in range(0, pre_qualification_nbr, 2):
                 sub_calif_groups.append(Group([], "Qualification"))
-                sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
-                                                                         places_to_fill + i])
-                sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized -
-                                                                         places_to_fill + i + 1])
+                sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized - places_to_fill + i])
+                sub_calif_groups[i].add_challenger(self.challengers_pool[max_authorized - places_to_fill + i + 1])
                 if i % 2 == 0:
                     self.tournament_tree.search_node(self.ki)[0].add_child(sub_calif_groups[i])
                 else:
@@ -65,7 +64,7 @@ class Tournament:
                     sub_calif_groups[i])
                 self.calif.insert(0, sub_calif_groups[i])
 
-    def handle_multiples_three_who_want_it(self, places_to_fill, people_who_want_it, max_authorized):
+    def __handle_multiples_three_who_want_it(self, places_to_fill, people_who_want_it, max_authorized):
         # TODO : clean, refactor and refactor this code
         pre_qualification_nbr = people_who_want_it / 3
         calif_groups = []
@@ -86,12 +85,12 @@ class Tournament:
         self.calif.append(self.ki)
         self.calif.append(self.igitsa)
         self.groups = self.calif
-        self.doneRound = -1
+        self.actual_round = -1
 
         self.tournament_type = "deux_parmi_trois"
         self.pool_round = pre_qualification_nbr
 
-    def handle_qualifications(self, max_authorized=4) -> None:
+    def __handle_qualifications(self, max_authorized=4) -> None:
         # TODO : clean, refactor and refactor this code
         """
             Handles the qualification until the point where there are almost no more challengers
@@ -118,9 +117,9 @@ class Tournament:
 
                 #  Handles the qualification depending from the analysed conditions
                 if (people_who_want_it / places_to_fill) % 2 == 0 and places_to_fill <= 4:
-                    self.handle_even_places_to_fill(places_to_fill, people_who_want_it, max_authorized)
+                    self.__handle_even_places_to_fill(places_to_fill, people_who_want_it, max_authorized)
                 elif people_who_want_it % 3 == 0 and places_to_fill % 2 == 0:
-                    self.handle_multiples_three_who_want_it(places_to_fill, people_who_want_it, max_authorized)
+                    self.__handle_multiples_three_who_want_it(places_to_fill, people_who_want_it, max_authorized)
                     return
                 else:
                     print("I'm not built for this case, handle it yourself!")
@@ -132,10 +131,10 @@ class Tournament:
             self.calif.append(self.ki)
             self.calif.append(self.igitsa)
             self.groups = self.calif
-            self.doneRound = -1
+            self.actual_round = -1
             self.tournament_type = "elimination directe"
 
-    def distribute_challengers(self):
+    def __distribute_challengers(self):
         """
             Add challengers from the pool rounds into direct elimination part of the tree and change mode
         """
@@ -146,36 +145,38 @@ class Tournament:
 
     def get_next_group(self) -> Optional[Group]:
         """
-            Get the next group in the tournament tree
+            Get the next group in the tournament tree depending on the tournament type
         :return: the next playing group
         """
-        if self.doneRound < len(self.groups) - 1:
-            if self.doneRound >= 0:
+        if self.actual_round < len(self.groups) - 1:
+            if self.actual_round >= 0:
                 if self.tournament_type == "elimination directe":
-                    node = self.tournament_tree.search_node(self.groups[self.doneRound])[0]
-                    if node.get_parent() is not None:
-                        node.get_parent().get_value().add_challenger(node.get_value().winner)
-                        self.rattrapages.add_challenger(node.get_value().loser)
+                    actual_node = self.tournament_tree.search_node(self.actual_group)[0]
+                    if actual_node.get_parent() is not None:
+                        actual_node.get_parent().get_value().add_challenger(self.actual_group.winner)
+                        self.rattrapages.add_challenger(self.actual_group.loser)
                 elif self.tournament_type == "deux_tours_pool_plus_qualif":
-                    self.groups[self.doneRound].sort_challengers_by_points()
-                    self.groups[self.doneRound].challengers[0].add_points(4 -
-                                                                          self.groups[self.doneRound].challenger_number)
-                    for k in range(self.groups[self.doneRound].challenger_number):
-                        self.challengers_pool[self.challengers_pool.index(self.groups[self.doneRound].challengers[k])] \
-                            .add_points(self.groups[self.doneRound].challenger_number - k)
-                    if self.doneRound == self.pool_round-1:
-                        self.handle_qualifications()
+                    self.actual_group.sort_challengers_by_points()
+                    self.actual_group.challengers[0].add_points(4 - self.actual_group.challenger_number)
+                    for k in range(self.actual_group.challenger_number):
+                        self.challengers_pool[self.challengers_pool.index(self.actual_group.challengers[k])] \
+                            .add_points(self.actual_group.challenger_number - k)
+                    if self.actual_round == self.pool_round-1:
+                        self.__handle_qualifications()
                 elif self.tournament_type == "deux_parmi_trois":
-                    self.groups[self.doneRound].remove_challenger(self.groups[self.doneRound].loser)
-                    if self.doneRound == self.pool_round-1:
-                        self.distribute_challengers()
-            self.doneRound += 1
-            return self.groups[self.doneRound]
+                    self.actual_group.remove_challenger(self.actual_group.loser)
+                    if self.actual_round == self.pool_round-1:
+                        self.__distribute_challengers()
+                elif self.tournament_type == "randomized pool":
+                    pass
+            self.actual_round += 1
+            self.actual_group = self.groups[self.actual_round]
+            return self.actual_group
         else:
             return None
 
     def get_rounds(self):
-        return self.doneRound
+        return self.actual_round
 
     def extract_from_json(self, file_path: str) -> None:
         """
