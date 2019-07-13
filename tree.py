@@ -1,5 +1,5 @@
 class Tree:
-    def __init__(self, initial_value=None, depth=1):
+    def __init__(self, initial_value=None, depth=2):
         self.root = Node(None, initial_value)
         self.depth = depth
 

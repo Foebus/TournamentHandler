@@ -270,6 +270,7 @@ class Tournament:
         """
             Saves the actual state of the game into a file named "savegame"
         """
+        return
         for c in self.challengers_pool:
             c.unload_image()
         with open("savegame", "wb") as saveFile:

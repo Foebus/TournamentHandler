@@ -135,6 +135,42 @@ def display_winner(ended_tournament):
     pygame.display.update(challengers_rectangle)
 
 
+def animate_arrow_rotation():
+    size = WIDTH, HEIGHT
+    screen = pygame.display.set_mode(size)
+    FPS = 30
+    clock = pygame.time.Clock()
+    BLACK = (0, 0, 0)
+    time_counter = 0
+
+    rot = 0
+    rot_speed = 2
+
+    image_orig = pygame.image.load("Images/arrow.jpeg")
+    image = image_orig.copy()
+    image.set_colorkey(BLACK)
+    rect = image.get_rect()
+    rect.center = (WIDTH // 2, HEIGHT // 2)
+
+    running = True
+    while running:
+        clock.tick(FPS)
+        windowSurface.fill(BLACK)
+        old_center = rect.center
+        # définir angle de rotation
+        rot = (rot + rot_speed) % 360
+        # roter l'image originale
+        new_image = pygame.transform.rotate(image_orig, rot)
+        rect = new_image.get_rect()
+        rect.center = old_center
+        windowSurface.blit(new_image, rect)
+        pygame.display.flip()
+
+        if time_counter == 300:
+            running = False
+        time_counter += 1
+
+
 def handle_mouseclick(x, y, actual_challengers):
     (w, h) = pygame.display.get_surface().get_size()
     if y > h/5:

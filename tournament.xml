@@ -1,0 +1,31 @@
+<tournament><challengers>
+    <challenger>
+        <name>Foebus</name>
+        <image>Images/marc.png</image>
+    </challenger>
+    <challenger>
+        <name>Kiwi</name>
+        <image>Images/marion.png</image>
+    </challenger>
+    <challenger>
+        <name>Greenty</name>
+        <image>Images/laure.png</image>
+    </challenger>
+    <challenger>
+        <name>Ancestral</name>
+        <image>Images/tim.png</image>
+    </challenger>
+    </challengers>
+    <groupes>
+        <groupe>
+            <name>Ka</name>
+            <member>Foebus</member>
+            <member>Kiwi</member>
+        </groupe>
+        <groupe>
+            <name>Ki</name>
+            <member>Greenty</member>
+            <member>Ancestral</member>
+        </groupe>
+    </groupes>
+</tournament>
