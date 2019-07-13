@@ -28,7 +28,7 @@ group_name_background = group_name_background.convert()
 group_name_background.fill((0, 0, 0))
 
 
-def update_score_display(actual_challengers_to_display, act_height):
+def update_score_display(actual_challengers_to_display, act_height = 0):
     """
 
     :param act_height: The height of the lowest image
@@ -53,11 +53,21 @@ def update_score_display(actual_challengers_to_display, act_height):
         pygame.display.update(point_rectangles[i])
 
 
-def display_challengers(actual_challengers_to_display):
+def display_text(pos_x, pos_y, content, size_x, size_y):
+    font = pygame.font.Font(None, FONT_SIZE)
+    group = font.render(content, 1, (255, 241, 0))
+    text_pos = group.get_rect(centerx=challengerSurface.get_width() / 2, top=5)
+    title_pos_x = WIDTH / 2 - len(content) * FONT_SIZE / 2
+    title_place = Rect(pos_x, pos_y, len(content) * FONT_SIZE, FONT_SIZE)
+    challengerSurface.blit(group_name_background, text_pos)
+    challengerSurface.blit(group, text_pos)
+    pygame.display.update(title_place)
+
+
+def display_challengers(actual_challengers_to_display: Group):
     """
 
     :param actual_challengers_to_display: the challenger group to display
-    :type actual_challengers_to_display: TournamentGroup.Group
     """
     font = pygame.font.Font(None, FONT_SIZE)
     challenger_number = actual_challengers_to_display.challenger_number
@@ -65,6 +75,7 @@ def display_challengers(actual_challengers_to_display):
     max_height = 0
     old_width = 0
     scale_ratio = 1
+    #  Displays challengers
     for i in range(challenger_number):
         act_challenger = actual_challengers_to_display.challengers[i]
         challenger_image = act_challenger.image
@@ -81,17 +92,14 @@ def display_challengers(actual_challengers_to_display):
         challengerSurface.blit(pseudo, text_pos)
         max_height = max(max_height, act_height)
     update_score_display(actual_challengers_to_display, max_height + FONT_SIZE)
+    #  Display lightnings between challengers
     for i in range(challenger_number - 1):
         challengerSurface.blit(lightning, ((i + 1) * old_width * scale_ratio - lightning.get_width() / 2, 0))
 
     group = font.render(actual_challengers_to_display.title, 1, (255, 241, 0))
-
-    text_pos = group.get_rect(centerx=challengerSurface.get_width() / 2,
-                              top=5)
-    title_place = Rect(WIDTH / 2 - len(str(actual_challengers_to_display.title)) * FONT_SIZE / 2,
-                       5,
-                       len(str(actual_challengers_to_display.title)) * FONT_SIZE,
-                       FONT_SIZE)
+    text_pos = group.get_rect(centerx=challengerSurface.get_width() / 2, top=5)
+    title_pos_x = WIDTH / 2 - len(str(actual_challengers_to_display.title)) * FONT_SIZE / 2
+    title_place = Rect(title_pos_x, 5, len(str(actual_challengers_to_display.title)) * FONT_SIZE, FONT_SIZE)
     challengerSurface.blit(group_name_background, text_pos)
     challengerSurface.blit(group, text_pos)
     pygame.display.update(title_place)
@@ -125,6 +133,17 @@ def display_winner(ended_tournament):
     challengerSurface.blit(pseudo, text_pos)
     challengers_rectangle = Rect(0, 0, WIDTH, HEIGHT)
     pygame.display.update(challengers_rectangle)
+
+
+def handle_mouseclick(x, y, actual_challengers):
+    (w, h) = pygame.display.get_surface().get_size()
+    if y > h/5:
+        i = int(x * actual_challengers.challenger_number / w)
+        actual_challengers.give_point(i)
+        update_score_display(actual_challengers)
+        return False
+    else:
+        return True
 
 
 def game_loop(game_state, act_tournament):
@@ -171,10 +190,7 @@ def game_loop(game_state, act_tournament):
                 act_tournament.save_yourself()
             elif event.type == MOUSEBUTTONUP:
                 (x, y) = pygame.mouse.get_pos()
-                (w, h) = pygame.display.get_surface().get_size()
-                i = int(x * actual_challengers.challengerNumber / w)
-                actual_challengers.give_point(i)
-                update_score_display(actual_challengers, height)
+                round_over = handle_mouseclick(x, y, actual_challengers)
         if round_over:
             round_over = False
             actual_challengers = act_tournament.get_next_group()
@@ -202,7 +218,7 @@ if os.path.isfile("savegame"):
         events = pygame.event.get()
         for event in events:
             if (event.type == KEYDOWN and event.key == K_n) or (event.type == KEYDOWN and event.key == K_ESCAPE):
-                tournament = Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=8)
+                tournament = Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=3)
                 tournament.extract_from_json("tournament.json")
                 decision_made = True
                 break
@@ -214,7 +230,7 @@ if os.path.isfile("savegame"):
                 f.close()
                 decision_made = True
 else:
-    tournament = Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=8)
+    tournament = Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=3)
     tournament.extract_from_json("tournament.json")
 
 background = pygame.Surface(screen.get_size())
