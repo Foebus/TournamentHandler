@@ -238,7 +238,10 @@ def game_loop(game_state, act_tournament):
         pygame.time.delay(100)
         loops_in_this_screen += 1
     display_winner(act_tournament)
-    os.remove("savegame")
+    try:
+        os.remove("savegame")
+    except:
+        print("And no need to erase the saved game!")
     # sleep(10000)
 
 
