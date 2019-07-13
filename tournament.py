@@ -1,5 +1,6 @@
 # coding=utf-8
 import pickle
+import random
 from typing import Optional
 
 import challenger
@@ -11,6 +12,8 @@ from TournamentGroup import Group
 
 class Tournament:
     def __init__(self, tournament_type="elimination directe", pool_rounds=0):
+        self.CONNEXITY_THRESHOLD = 3
+        self.seen_duels = {}
         self.actual_round = -1
         self.tournament_type = tournament_type
         self.actual_group = None
@@ -70,7 +73,7 @@ class Tournament:
         calif_groups = []
         for i in range(pre_qualification_nbr):
             calif_groups.append(Group([], "Qualification, " + str(people_who_want_it) +
-                                          " challengers se disputent " + str(places_to_fill) + " places"))
+                                      " challengers se disputent " + str(places_to_fill) + " places"))
             if i % 2 == 0:
                 self.tournament_tree.search_node(self.ki)[0].add_child(calif_groups[i])
             else:
@@ -149,9 +152,9 @@ class Tournament:
         :return: the next playing group
         """
         if self.actual_round < len(self.groups) - 1:
-            if self.actual_round >= 0:
+            if self.actual_round >= 0 or self.tournament_type == "randomized pool":
                 if self.tournament_type == "elimination directe":
-                    actual_node = self.tournament_tree.search_node(self.actual_group)[0]
+                    actual_node = self.tournament_tree.search_node(self.actual_group)
                     if actual_node.get_parent() is not None:
                         actual_node.get_parent().get_value().add_challenger(self.actual_group.winner)
                         self.rattrapages.add_challenger(self.actual_group.loser)
@@ -161,14 +164,20 @@ class Tournament:
                     for k in range(self.actual_group.challenger_number):
                         self.challengers_pool[self.challengers_pool.index(self.actual_group.challengers[k])] \
                             .add_points(self.actual_group.challenger_number - k)
-                    if self.actual_round == self.pool_round-1:
+                    if self.actual_round == self.pool_round - 1:
                         self.__handle_qualifications()
                 elif self.tournament_type == "deux_parmi_trois":
                     self.actual_group.remove_challenger(self.actual_group.loser)
-                    if self.actual_round == self.pool_round-1:
+                    if self.actual_round == self.pool_round - 1:
                         self.__distribute_challengers()
                 elif self.tournament_type == "randomized pool":
-                    pass
+                    min_connected = self._get_min_connected_node()
+                    if min_connected < self.CONNEXITY_THRESHOLD:
+                        self.actual_round = min(self.actual_round + 1, 1)
+                        return self._handle_get_next_group_rand()
+                    else:
+                        self.__distribute_challengers_rand()
+
             self.actual_round += 1
             self.actual_group = self.groups[self.actual_round]
             return self.actual_group
@@ -200,6 +209,7 @@ class Tournament:
                 self.groups.append(Group([], act_name))
 
             # Find matching index
+            i = 0
             for i, group in enumerate(self.groups):
                 if group.get_title() == act_name:
                     break
@@ -207,6 +217,7 @@ class Tournament:
             for n in g["Members"]:
                 self.groups[i].add_challenger(self.challengers[n])
             for n in g["SubGroup"]:
+                k = 0
                 for k, group in enumerate(self.groups):
                     if group.get_title() == n:
                         break
@@ -236,9 +247,9 @@ class Tournament:
             future_elem = {}
             d += 1
 
-        self.tournament_tree.depth = d
+        self.tournament_tree.depth = d + 1
         # self.tournament_tree.print()
-        self.challengers_pool = self.challengers.values()
+        self.challengers_pool = list(self.challengers.values())
 
     def sort_challengers_by_score(self) -> None:
         """
@@ -265,3 +276,84 @@ class Tournament:
             pickle.dump(self, saveFile)
         for c in self.challengers_pool:
             c.reload_image()
+
+    def _handle_get_next_group_rand(self):
+        if self.actual_round > 0:
+            duel = self.actual_group.winner, self.actual_group.loser
+            if self.actual_group.winner not in self.seen_duels.keys():
+                self.seen_duels[self.actual_group.winner] = []
+            if self.actual_group.loser not in self.seen_duels.keys():
+                self.seen_duels[self.actual_group.loser] = []
+            self.seen_duels[self.actual_group.winner].append(duel)
+            self.seen_duels[self.actual_group.loser].append(duel)
+            self.actual_group.winner.add_points(self.actual_group.get_points(self.actual_group.winner))
+            self.actual_group.loser.add_points(self.actual_group.get_points(self.actual_group.loser))
+        new_duelist = {}
+        second_choice_duelists = {}
+        total_weights = 0
+        max_weight = 0
+        for d in self.challengers.keys():
+            if self.challengers[d] not in list(self.seen_duels.keys()):
+                new_duelist[d] = 1
+                total_weights += 1
+            elif len(self.seen_duels) >= len(self.challengers) - 1:
+                if len(self.seen_duels[self.challengers[d]]) < 5:
+                    this_weight = len(self.seen_duels[self.challengers[d]])
+                    total_weights += this_weight
+                    new_duelist[d] = this_weight
+                    max_weight = max(this_weight, max_weight)
+                else:
+                    second_choice_duelists[d] = 1
+
+        if len(self.seen_duels) < len(self.challengers) - 1:
+            duelist1 = list(new_duelist.keys())[random.randrange(0, len(new_duelist))]
+            duelist2 = duelist1
+            while duelist2 == duelist1:
+                duelist2 = list(new_duelist.keys())[random.randrange(0, len(new_duelist))]
+            self.actual_group = Group([self.challengers[duelist1], self.challengers[duelist2]], "Poule aléatoire")
+        elif self.pool_round * 2 * len(self.challengers) >= len(self.seen_duels):
+            first = self.get_rand(total_weights, max_weight + 2, new_duelist)
+            second = first
+            tries = 0
+            while (first == second or (first, second) in self.seen_duels[self.challengers[first]] or (second, first) in
+                   self.seen_duels[self.challengers[first]]) and tries < 1000:
+                second = self.get_rand(total_weights, max_weight + 2, new_duelist)
+                tries += 1
+            while first == second or (first, second) in self.seen_duels[self.challengers[first]] or (second, first) in \
+                    self.seen_duels[self.challengers[first]]:
+                second = self.get_rand(len(second_choice_duelists), 3, second_choice_duelists)
+
+            self.actual_group = Group([self.challengers[first], self.challengers[second]], "Poule aléatoire")
+
+        return self.actual_group
+
+    def get_rand(self, total_weights: int, max_weight: int, val_dict: dict):
+        first = random.randrange(0, total_weights)
+        first_index = 0
+        while first > max_weight - val_dict[list(val_dict.keys())[first_index]]:
+            first -= val_dict[list(val_dict.keys())[first_index]]
+            first_index += 1
+        return list(val_dict.keys())[first_index]
+
+    def _get_min_connected_node(self):
+        if len(self.seen_duels) == 0:
+            return 0
+        min_connection = len(self.challengers)
+        for c in self.challengers_pool:
+            if c in self.seen_duels.keys() and len(self.seen_duels[c]) < min_connection:
+                min_connection = len(self.seen_duels[c])
+            elif c not in self.seen_duels.keys():
+                min_connection = 0
+        return min_connection
+
+    def __distribute_challengers_rand(self):
+        self.pool_round = 2
+        self.sort_challengers_by_score()
+        pool1 = Group(self.challengers_pool[:2])
+        pool2 = Group(self.challengers_pool[2:4])
+        self.ki = self.groups[0]
+        self.ka = self.groups[1]
+        self.igitsa = self.groups[2]
+        self.groups = [pool1, pool2] + self.groups
+        self.__distribute_challengers()
+        self.actual_round = 1
