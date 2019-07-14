@@ -13,7 +13,7 @@ from pygame.locals import *
 
 def handle_mouseclick(x, y, actual_challengers):
     (w, h) = pygame.display.get_surface().get_size()
-    if y > h/5:
+    if y > h / 5:
         i = int(x * actual_challengers.challenger_number / w)
         actual_challengers.give_point(i)
         update_score_display(actual_challengers)
@@ -128,14 +128,16 @@ if os.path.isfile("savegame"):
 
     decision_made = False
     while not decision_made:
-        events = pygame.event.get()
-        for event in events:
-            if (event.type == KEYDOWN and event.key == K_n) or (event.type == KEYDOWN and event.key == K_ESCAPE):
+        loading_events = pygame.event.get()
+        for loading_event in loading_events:
+            if (loading_event.type == KEYDOWN and loading_event.key == K_n) or (
+                    loading_event.type == KEYDOWN and loading_event.key == K_ESCAPE):
                 tournament = Tournament(tournament_type="deux_tours_pool_plus_qualif", pool_rounds=3)
                 tournament.extract_from_json("tournament.json")
                 decision_made = True
                 break
-            elif (event.type == KEYDOWN and event.key == K_y) or (event.type == KEYDOWN and event.key == K_INSERT):
+            elif (loading_event.type == KEYDOWN and loading_event.key == K_y) or (
+                    loading_event.type == KEYDOWN and loading_event.key == K_INSERT):
                 f = open("savegame", "rb")
                 tournament = pickle.load(f)
                 for c in tournament.challengers_pool:
