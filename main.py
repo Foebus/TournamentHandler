@@ -191,9 +191,12 @@ def game_loop(game_state, act_tournament):
     :type act_tournament: tournament.Tournament
     """
     round_over = False
+    test_over = True
     actual_challengers = act_tournament.get_next_group()
     height = display_challengers(actual_challengers)
     loops_in_this_screen = 0
+    points_given = -1
+    act_test = Challenge(3)
     while game_state != "gameover":
         events = pygame.event.get()
         for event in events:
@@ -202,24 +205,33 @@ def game_loop(game_state, act_tournament):
             elif event.type == KEYDOWN and event.key == K_1:
                 actual_challengers.give_point(0)
                 update_score_display(actual_challengers, height)
+                test_over = True
             elif event.type == KEYDOWN and event.key == K_2:
                 actual_challengers.give_point(1)
                 update_score_display(actual_challengers, height)
+                test_over = True
             elif event.type == KEYDOWN and event.key == K_3:
                 actual_challengers.give_point(2)
                 update_score_display(actual_challengers, height)
+                test_over = True
             elif event.type == KEYDOWN and event.key == K_4:
                 actual_challengers.give_point(3)
                 update_score_display(actual_challengers, height)
+                test_over = True
             elif event.type == KEYDOWN and event.key == K_5:
                 actual_challengers.give_point(4)
                 update_score_display(actual_challengers, height)
+                test_over = True
             elif event.type == KEYDOWN and event.key == K_6:
                 actual_challengers.give_point(5)
                 update_score_display(actual_challengers, height)
+                test_over = True
             elif event.type == KEYDOWN and event.key == K_7:
                 actual_challengers.give_point(6)
                 update_score_display(actual_challengers, height)
+                test_over = True
+            elif event.type == KEYDOWN and event.key == K_8:
+                animate_arrow_rotation(1, windowSurface)
             elif event.type == KEYDOWN and event.key == K_INSERT:
                 round_over = True
             elif event.type == KEYDOWN and event.key == K_s:
@@ -227,14 +239,37 @@ def game_loop(game_state, act_tournament):
             elif event.type == MOUSEBUTTONUP:
                 (x, y) = pygame.mouse.get_pos()
                 round_over = handle_mouseclick(x, y, actual_challengers)
+                if not round_over:
+                    test_over = True
+        if test_over:
+            test_over = False
+            points_given += 1
+            if points_given == act_test.total_points:
+                round_over = True
+            else:
+                objective, genre = act_test.get_next_test()
+                objective = objective.split("\n")
+                if len(objective) < 3:
+                    objective += [" "]
+                for i, line in enumerate(objective):
+                    left = (WIDTH - 3 * FONT_SIZE * len(line) // 8) / 2
+                    top = 5 * HEIGHT / 6 + i * FONT_SIZE
+                    objective_rubber = pygame.Surface((len(line) * FONT_SIZE, FONT_SIZE))
+                    objective_rubber.fill((0, 0, 0))
+                    display_text(left, top, line, objectiveSurface, objective_rubber, erase_line=True)
+
         if round_over:
             round_over = False
+            points_given = -1
+            test_over = True
+            act_test = Challenge(3)
             actual_challengers = act_tournament.get_next_group()
             if actual_challengers is None:
                 game_state = "gameover"
             else:
                 act_tournament.save_yourself()
                 height = display_challengers(actual_challengers)
+
         pygame.time.delay(100)
         loops_in_this_screen += 1
     display_winner(act_tournament)
