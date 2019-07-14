@@ -1,4 +1,5 @@
 # coding=utf-8
+from time import sleep
 
 import pygame
 import sys
@@ -117,7 +118,7 @@ def game_loop(game_state, act_tournament):
         os.remove("savegame")
     except:
         print("And no need to erase the saved game!")
-    # sleep(10000)
+    sleep(300)
 
 
 pygame.display.set_caption('Challenge en cours')
