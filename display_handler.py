@@ -37,10 +37,7 @@ orig_arrow = pygame.transform.scale(orig_arrow, (133, 73))
 def update_score_display(actual_challengers_to_display: Group):
     """
 
-    :param act_height: The height of the lowest image
-    :type act_height: int
     :param actual_challengers_to_display: The group of challengers whose name to display
-    :type actual_challengers_to_display: TournamentGroup.Group
     """
     font = pygame.font.Font(None, FONT_SIZE)
     challenger_number = actual_challengers_to_display.challenger_number
@@ -125,7 +122,6 @@ def display_winner(ended_tournament: Tournament):
     """
 
     :param ended_tournament: The tournament where to find the winner
-    :type ended_tournament: tournament.Tournament
     """
     reset_display()
     winner = ended_tournament.groups[len(ended_tournament.groups) - 1].winner
