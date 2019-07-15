@@ -83,6 +83,10 @@ def game_loop(game_state, act_tournament):
             else:
                 objective, genre = act_test.get_next_test()
                 objective = objective.split("\n")
+
+                animate_arrow_rotation(Test.GENRE[genre] / len(Test.GENRE), windowSurface)
+                display_challengers(actual_challengers)
+
                 if len(objective) < 3:
                     objective += [" "]
                 for i, line in enumerate(objective):
