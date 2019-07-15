@@ -1,3 +1,5 @@
+import random
+
 import pygame
 from pygame.locals import *
 from tournament import Group, Tournament
@@ -28,6 +30,8 @@ group_name_background = pygame.display.set_mode((WIDTH, FONT_SIZE))
 group_name_background = group_name_background.convert()
 group_name_background.fill((0, 0, 0))
 
+orig_arrow = pygame.image.load("Images/arrow.png")
+orig_arrow = pygame.transform.scale(orig_arrow, (133, 73))
 
 
 def update_score_display(actual_challengers_to_display: Group):
@@ -143,80 +147,55 @@ def display_winner(ended_tournament: Tournament):
 
 
 def animate_arrow_rotation(goal, window_surface, center_x=WIDTH // 2, center_y=HEIGHT // 2):
-    fps = 30
     clock = pygame.time.Clock()
-    black = (0, 0, 0)
-    time_counter = 0
 
     goal_rotation = goal * 360
-    acceleration_time = 100
-    max_speed_time = 200
-    deceleration_time = 20
+    acceleration_time = random.randrange(50, 100)
+    max_speed_time = random.randrange(100, 200)
+    deceleration_time = 180
 
     rot = 0
     max_rot_speed = 8
 
-    image_orig = pygame.image.load("Images/arrow.jpeg")
-    image = image_orig.copy()
-    image.set_colorkey(black)
+    image = orig_arrow.copy()
+    image.set_colorkey((0, 0, 0))
     rect = image.get_rect()
     rect.center = (center_x, center_y)
 
-    running = True
-    while running:
-        clock.tick(fps)
-        window_surface.fill(black)
-        old_center = rect.center
-        # définir angle de rotation
-        rot = (rot + max_rot_speed * time_counter / acceleration_time) % 360
-        # roter l'image originale
-        new_image = pygame.transform.rotate(image_orig, rot)
-        rect = new_image.get_rect()
-        rect.center = old_center
-        window_surface.blit(new_image, rect)
-        pygame.display.flip()
+    rot = spin_image(window_surface, clock, rect, rot, acceleration_time,
+                     acceleration=lambda x, y: x + (max_rot_speed * y) / acceleration_time)
+    rot = spin_image(window_surface, clock, rect, rot, max_speed_time, acceleration=lambda x, y: x + max_rot_speed)
+    rot = rot % 360
+    deceleration_time = ((2 * (goal_rotation - rot)) / max_rot_speed) % 360
+    if deceleration_time == 0:
+        deceleration_time = 90
+    spin_image(window_surface, clock, rect, rot, deceleration_time,
+               acceleration=lambda x, y: x + max_rot_speed * (deceleration_time - y) / deceleration_time)
 
-        if time_counter == acceleration_time:
-            running = False
-        time_counter += 1
 
+def spin_image(surface, clock, rect, init_rot, total_time, acceleration=lambda x, y: x):
+    fps = 30
     time_counter = 0
+    black = (0, 0, 0)
+    rot = init_rot
     running = True
     while running:
         clock.tick(fps)
-        window_surface.fill(black)
+        surface.fill(black)
         old_center = rect.center
         # définir angle de rotation
-        rot = (rot + max_rot_speed) % 360
+        rot = acceleration(rot, time_counter)
         # roter l'image originale
-        new_image = pygame.transform.rotate(image_orig, rot)
+        new_image = pygame.transform.rotate(orig_arrow, rot)
         rect = new_image.get_rect()
         rect.center = old_center
-        window_surface.blit(new_image, rect)
+        surface.blit(new_image, rect)
         pygame.display.flip()
 
-        if time_counter == max_speed_time:
+        if time_counter == total_time:
             running = False
         time_counter += 1
-
-    time_counter = 0
-    running = True
-    while running:
-        clock.tick(fps)
-        window_surface.fill(black)
-        old_center = rect.center
-        # définir angle de rotation
-        rot = (rot + max_rot_speed * (deceleration_time - time_counter) / deceleration_time) % 360
-        # roter l'image originale
-        new_image = pygame.transform.rotate(image_orig, rot)
-        rect = new_image.get_rect()
-        rect.center = old_center
-        window_surface.blit(new_image, rect)
-        pygame.display.flip()
-
-        if time_counter == max_speed_time:
-            running = False
-        time_counter += 1
+    return rot
 
 
 def reset_display():
