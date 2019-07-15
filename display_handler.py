@@ -29,7 +29,8 @@ group_name_background = group_name_background.convert()
 group_name_background.fill((0, 0, 0))
 
 
-def update_score_display(actual_challengers_to_display, act_height=0):
+
+def update_score_display(actual_challengers_to_display: Group):
     """
 
     :param act_height: The height of the lowest image
@@ -98,7 +99,7 @@ def display_challengers(actual_challengers_to_display: Group):
                                    top=2 * FONT_SIZE)
         challengerSurface.blit(pseudo, text_pos)
         max_height = max(max_height, act_height)
-    update_score_display(actual_challengers_to_display, max_height + FONT_SIZE)
+    update_score_display(actual_challengers_to_display)
     #  Display lightnings between challengers
     for i in range(challenger_number - 1):
         challengerSurface.blit(lightning, ((i + 1) * old_width * scale_ratio - lightning.get_width() / 2, 0))

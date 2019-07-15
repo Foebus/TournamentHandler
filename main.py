@@ -4,7 +4,7 @@ from time import sleep
 import pygame
 import sys
 
-from challenge import Challenge
+from challenge import Challenge, Test
 from tournament import Tournament
 from display_handler import *
 import pickle
@@ -34,7 +34,6 @@ def game_loop(game_state, act_tournament):
     round_over = False
     test_over = True
     actual_challengers = act_tournament.get_next_group()
-    height = display_challengers(actual_challengers)
     loops_in_this_screen = 0
     points_given = -1
     act_test = Challenge(3)
@@ -45,31 +44,24 @@ def game_loop(game_state, act_tournament):
                 sys.exit()
             elif event.type == KEYDOWN and event.key == K_1:
                 actual_challengers.give_point(0)
-                update_score_display(actual_challengers, height)
                 test_over = True
             elif event.type == KEYDOWN and event.key == K_2:
                 actual_challengers.give_point(1)
-                update_score_display(actual_challengers, height)
                 test_over = True
             elif event.type == KEYDOWN and event.key == K_3:
                 actual_challengers.give_point(2)
-                update_score_display(actual_challengers, height)
                 test_over = True
             elif event.type == KEYDOWN and event.key == K_4:
                 actual_challengers.give_point(3)
-                update_score_display(actual_challengers, height)
                 test_over = True
             elif event.type == KEYDOWN and event.key == K_5:
                 actual_challengers.give_point(4)
-                update_score_display(actual_challengers, height)
                 test_over = True
             elif event.type == KEYDOWN and event.key == K_6:
                 actual_challengers.give_point(5)
-                update_score_display(actual_challengers, height)
                 test_over = True
             elif event.type == KEYDOWN and event.key == K_7:
                 actual_challengers.give_point(6)
-                update_score_display(actual_challengers, height)
                 test_over = True
             elif event.type == KEYDOWN and event.key == K_8:
                 animate_arrow_rotation(1, windowSurface)
@@ -84,6 +76,7 @@ def game_loop(game_state, act_tournament):
                     test_over = True
         if test_over:
             test_over = False
+            update_score_display(actual_challengers)
             points_given += 1
             if points_given == act_test.total_points:
                 round_over = True
