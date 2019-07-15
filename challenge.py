@@ -47,8 +47,17 @@ class Test:
                        ("Hearthstone", "PC")]
             }
 
+    GENRE = {
+        "Plateforme": 0,
+        "STR": 1,
+        "Course": 2,
+        "Puzzle": 3,
+        "Combat": 4,
+        "FPS": 5
+             }
+
     CHALLENGE_DESCRIPTION = {"STR": ["Duel", "Combat en Coop, celui qui a le meilleur score à la fin gagne",
-                                     ""],
+                                     "Le premier à avoir amassé 500 de chaque type de ressource gagne"],
                              "FPS": ["Duel sur petite cart",
                                      "Celui qui survit le plus longtemps, pourchassé par le champion, 3 morts",
                                      "Capture de drapeau avec 5 bot par équipe en mode facile",
