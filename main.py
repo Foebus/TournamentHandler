@@ -84,14 +84,29 @@ def game_loop(game_state, act_tournament):
                 objective, genre, game = act_test.get_next_test()
                 objective = objective.split("\n")
 
-                animate_arrow_rotation(Test.GENRE[genre] / len(Test.GENRE), windowSurface)
+                spin_wheel("GENRE", genre)
+                sleep(2)
+                if genre != "FPS":
+                    spin_wheel(genre.upper(), game)
+                    sleep(2)
+
                 display_challengers(actual_challengers)
 
                 if len(objective) < 3:
                     objective += [" "]
+
+                line = objective[0]
+                font_size = FONT_SIZE + 16
+                left = (WIDTH - 3 * font_size * len(line) // 8) / 2
+                top = 5
+                objective_rubber = pygame.Surface((len(line) * font_size, font_size))
+                objective_rubber.fill((0, 0, 0))
+                display_text(left, top, line, objectiveSurface, objective_rubber, erase_line=True, font_size=font_size)
+
+                objective = objective[1:]
                 for i, line in enumerate(objective):
                     left = (WIDTH - 3 * FONT_SIZE * len(line) // 8) / 2
-                    top = 5 * HEIGHT / 6 + i * FONT_SIZE
+                    top = 5 * HEIGHT / 6 + (i + 1) * FONT_SIZE
                     objective_rubber = pygame.Surface((len(line) * FONT_SIZE, FONT_SIZE))
                     objective_rubber.fill((0, 0, 0))
                     display_text(left, top, line, objectiveSurface, objective_rubber, erase_line=True)
