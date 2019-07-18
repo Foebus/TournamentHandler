@@ -143,8 +143,8 @@ def display_winner(ended_tournament: Tournament):
     winner = ended_tournament.groups[len(ended_tournament.groups) - 1].winner
     font = pygame.font.Font(None, FONT_SIZE)
     act_width = winner.image.get_width()
-    scale_ratio = float(WIDTH) / act_width
     act_height = winner.image.get_height()
+    scale_ratio = float(HEIGHT) / act_height
     winner.rescale_image(int(act_width * scale_ratio),
                          int(act_height * scale_ratio))
     challenger_image = winner.image
