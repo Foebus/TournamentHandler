@@ -81,7 +81,7 @@ def game_loop(game_state, act_tournament):
             if points_given == act_test.total_points:
                 round_over = True
             else:
-                objective, genre = act_test.get_next_test()
+                objective, genre, game = act_test.get_next_test()
                 objective = objective.split("\n")
 
                 animate_arrow_rotation(Test.GENRE[genre] / len(Test.GENRE), windowSurface)

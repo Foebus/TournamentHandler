@@ -9,9 +9,9 @@ class Challenge:
         test_generator = Test()
         seen_style = []
         while total_points > len(self.test):
-            test, style = test_generator.create_test()
+            test, style, game = test_generator.create_test()
             if style not in seen_style:
-                self.test.append((test, style))
+                self.test.append((test, style, game))
                 seen_style.append(style)
 
     def get_next_test(self):
@@ -19,33 +19,55 @@ class Challenge:
             result = self.test[0]
             self.test = self.test[1:]
             return result
-        return None, None
+        return None, None, None
 
 
 class Test:
-    GAME = {"STR": [("Warcraft 3", "PC", ["Duel sur une carte adaptée"]),
-                    ("Le seigneur des Anneaux", "PC"), ("Starcraft", "PC"),
-                    ("Starcraft 2", "PC"), ("Empire Earth", "PC"), ("Age of Mythology", "PC"),
-                    ("Age of Empire", "PC")],
-            "FPS": [("Unreal Tournament3", "PC"), ("Far Cry 4", "PC"), ("Far cry primal", "PC"),
-                    ("Unreal Tournament 4", "PC"), ("Metroid", "GameCube"),
-                    ("Fortnite", "PC"), ("Overwatch", "PC")],
-            "Course": [("Mario Kart", "Wii"), ("Rock'N Roll Racing", "PC"), ("Motor Storm", "PS3")],
-            "Plateforme": [("Super Meat Boy", "PC"), ("Syobon Action", "PC"), ("Spelunky", "PC"),
-                           ("Spelunky 2.0", "PC"), ("Pix The Cat", "PS4"), ("Mr Robot", "PS4"),
-                           ("Transistor", "PC"), ("Axiom Verge", "PC"), ("City of Brass", "PC"),
-                           ("Enter the Gungeon", "PC"), ("Rogue Legacy", "PS4")],
-            "Combat": [("Injustice II", "PC"), ("Injustice", "PS3"), ("Soul Calibur 4", "PS3"),
-                       ("Soul Calibur 5", "PS3"), ("Tekken", "PS3"), ("Dragonball Tenkaichi", "PS2"),
-                       ("Super Smash Bros", "GameCube"), ("Super Smash Bros", "Wii")],
-            "Puzzle": [("Antichamber", "PC"),
-                       ("Journey", "PC"),
-                       ("Baba is you", "PC"),
-                       ("Prime number Labyrinth", "PC"),
-                       ("McPixel", "PC"),
-                       ("Timbleweed Park", "PC"),
-                       ("Hearthstone", "PC")]
-            }
+    GAME = {"STR": [
+        ("Starcraft 2", "PC"),
+        ("Warcraft 3", "PC", ["Duel sur une carte adaptée"]),
+        ("Age of Mythology", "PC"),
+        ("Starcraft", "PC"),
+        ("Empire Earth", "PC"),
+        ("Le seigneur des Anneaux", "PC"),
+    ],
+        "FPS": [("Unreal Tournament3", "PC"),
+                ("Unreal Tournament 4", "PC")
+                ],
+        "Course": [
+            ("Rock'N Roll Racing", "PC"),
+            ("Mario Kart", "Wii"),
+            ("Motor Storm", "PS3"),
+        ],
+        "Plateforme": [
+            ("Super Meat Boy", "PC"),
+            ("Axiom Verge", "PC"),
+            ("Transistor", "PC"),
+            ("Spelunky 2.0", "PC"),
+            ("Pix The Cat", "PS4"),
+            ("Rogue Legacy", "PS4"),
+            ("Syobon Action", "PC"),
+            ("Enter the Gungeon", "PC"),
+            ("Spelunky", "PC"),
+            ("City of Brass", "PC"),
+        ],
+        "Combat": [
+            ("Injustice II", "PC"),
+            ("Soul Calibur 5", "PS3"),
+            ("Super Smash Bros", "Wii"),
+            ("Injustice", "PS3"),
+            ("Tekken", "PS3"),
+            ("Super Smash Bros", "GameCube"),
+            ("Soul Calibur 4", "PS3"),
+            ("Dragonball Tenkaichi", "PS2"),
+        ],
+        "Puzzle": [
+            ("Antichamber", "PC", ["trouver le deuxième gun"]),
+            ("Baba is you", "PC", ["Faire les 7 premiers niveaux"]),
+            ("McPixel", "PC", ["Finir un ensemble de 3 niveaux", "Accéder à un niveau bonus"]),
+            ("Timbleweed Park", "PC", ["Finir un chapitre du jeu"])
+        ]
+    }
 
     GENRE = {
         "Plateforme": 0,
@@ -54,7 +76,7 @@ class Test:
         "Puzzle": 3,
         "Combat": 4,
         "FPS": 5
-             }
+    }
 
     CHALLENGE_DESCRIPTION = {"STR": ["Duel", "Combat en Coop, celui qui a le meilleur score à la fin gagne",
                                      "Le premier à avoir amassé 500 de chaque type de ressource gagne"],
@@ -70,7 +92,7 @@ class Test:
                                             "SpeedRun, 3 niveaux à 100%"],
                              "Combat": ["Premier à 3 victoires", "Premier à 5 victoires",
                                         "Premier à 7 victoires", "Survie contre le Champion, meilleur timer"],
-                             "Puzzle": ["Passer les 5 premiers points de contrôle"]
+                             "Puzzle": []
                              }
 
     HANDICAP = {"PC": ["en ayant l'écran à l'envers", "en ayant la souris en mauvaise main", "à la trackball",
@@ -98,8 +120,8 @@ class Test:
 
         objective = possible_objective[random.randrange(0, len(possible_objective))]
 
-        handicap = "" if handicap == "" else "Mais vous devrez le faire " + handicap
+        handicap = "" if handicap == "" else "Handicap : " + handicap
 
-        return ("Le Défi se fera sur " + game + " sur " + console + "\n" +
-                "L'objectif sera " + objective + "\n" +
-                handicap, style)
+        return (game + " sur " + console + "\n" +
+                "Objectif : " + objective + "\n" +
+                handicap, style, game)
