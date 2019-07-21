@@ -1,5 +1,6 @@
 import random
 from enum import Enum
+from time import sleep
 
 import pygame
 from pygame.locals import *
@@ -159,6 +160,77 @@ def display_winner(ended_tournament: Tournament):
     pygame.display.update(challengers_rectangle)
 
 
+def display_act_challenge(actual_challengers: Group, objective: str):
+    objective = objective.split("\n")
+    display_challengers(actual_challengers)
+
+    if len(objective) < 3:
+        objective += [" "]
+
+    line = objective[0]
+    font_size = FONT_SIZE + 16
+    left = (WIDTH - 3 * font_size * len(line) // 8) / 2
+    top = 5
+    objective_rubber = pygame.Surface((len(line) * font_size, font_size))
+    objective_rubber.fill((0, 0, 0))
+    display_text(left, top, line, objectiveSurface, objective_rubber, erase_line=True, font_size=font_size)
+
+    objective = objective[1:]
+    for i, line in enumerate(objective):
+        left = (WIDTH - 3 * FONT_SIZE * len(line) // 8) / 2
+        top = 5 * HEIGHT / 6 + (i + 1) * FONT_SIZE
+        objective_rubber = pygame.Surface((len(line) * FONT_SIZE, FONT_SIZE))
+        objective_rubber.fill((0, 0, 0))
+        display_text(left, top, line, objectiveSurface, objective_rubber, erase_line=True)
+
+
+def display_leader_board(tournament: Tournament):
+    tournament.sort_challengers_by_score()
+    reset_display()
+
+    title = "Classement"
+    left = (WIDTH - 3 * FONT_SIZE * len(title) // 8) / 2
+    display_text(pos_x=left, pos_y=HEIGHT//6, content=title, surface=objectiveSurface, font_size=FONT_SIZE + 16)
+
+    left_start = WIDTH // 5
+    left_points = WIDTH // 5 + 3 * 20 * FONT_SIZE//8
+    left_games = WIDTH // 5 + 3 * 30 * FONT_SIZE//8
+
+    for i, challenger in enumerate(tournament.challengers_pool):
+        if i % 2 == 0:
+            challenger_color = (255, 241, 0)
+            points_color = (255, 50, 0)
+            games_color = (0, 255, 50)
+
+        else:
+            challenger_color = (150, 255, 0)
+            points_color = (250, 150, 0)
+            games_color = (0, 255, 150)
+        duels_nb = len(tournament.seen_duels[challenger]) if challenger in tournament.seen_duels.keys() else 0
+        challenger_info = str(i + 1) + " - " + challenger.name
+        points_info = " Points : " + str(challenger.points)
+        game_info = " Parties : " + str(duels_nb)
+        top = 2 * HEIGHT / 6 + (i + 1) * FONT_SIZE
+
+        objective_rubber = pygame.Surface((len(challenger_info) * FONT_SIZE, FONT_SIZE))
+        objective_rubber.fill((0, 0, 0))
+        display_text(left_start, top, challenger_info, objectiveSurface, objective_rubber, text_color=challenger_color)
+
+        points_rubber = pygame.Surface((len(challenger_info) * FONT_SIZE, FONT_SIZE))
+        points_rubber.fill((0, 0, 0))
+
+        display_text(left_points, top, points_info, objectiveSurface, points_rubber, text_color=points_color)
+        display_text(left_games, top, game_info, objectiveSurface, points_rubber, text_color=games_color)
+
+
+def display_genre_game_animation(genre: str, game: str):
+    spin_wheel("GENRE", genre)
+    sleep(2)
+    if genre != "FPS":
+        spin_wheel(genre.upper(), game)
+        sleep(2)
+
+
 def spin_wheel(kind, objective):
     data, image = wheel_information[WheelKind[kind]]
     side = min(WIDTH, HEIGHT)
@@ -240,3 +312,4 @@ def reset_display():
     background = pygame.Surface(screen.get_size())
     background.fill((0, 0, 0))
     windowSurface.blit(background, (0, 0))
+    pygame.display.update(background.get_rect())
