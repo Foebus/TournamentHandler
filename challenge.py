@@ -13,12 +13,13 @@ class Challenge:
             if style not in seen_style:
                 self.test.append((test, style, game))
                 seen_style.append(style)
+        self.act_test = self.test[0]
 
     def get_next_test(self):
         if len(self.test) > 0:
-            result = self.test[0]
+            self.act_test = self.test[0]
             self.test = self.test[1:]
-            return result
+            return self.act_test
         return None, None, None
 
 

@@ -5,11 +5,93 @@ import pygame
 import sys
 
 from challenge import Challenge, Test
-from tournament import Tournament
 from display_handler import *
 import pickle
 import os.path
 from pygame.locals import *
+
+
+def handle_events_leaderboard():
+    continue_displaying_leaderboard = True
+    events = pygame.event.get()
+    for event in events:
+        if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
+            sys.exit()
+        elif event.type == MOUSEBUTTONUP:
+            continue_displaying_leaderboard = False
+    return continue_displaying_leaderboard
+
+
+enables_animation = True
+
+
+def handle_events_standard_mode(actual_challengers, act_test, act_tournament, points_given,
+                                game_state):
+    round_over = False
+    test_over = False
+    ask_for_lb = False
+    events = pygame.event.get()
+    for event in events:
+        if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
+            sys.exit()
+        elif event.type == KEYDOWN and event.key == K_1:
+            actual_challengers.give_point(0)
+            test_over = True
+        elif event.type == KEYDOWN and event.key == K_2:
+            actual_challengers.give_point(1)
+            test_over = True
+        elif event.type == KEYDOWN and event.key == K_3:
+            actual_challengers.give_point(2)
+            test_over = True
+        elif event.type == KEYDOWN and event.key == K_4:
+            actual_challengers.give_point(3)
+            test_over = True
+        elif event.type == KEYDOWN and event.key == K_5:
+            actual_challengers.give_point(4)
+            test_over = True
+        elif event.type == KEYDOWN and event.key == K_6:
+            actual_challengers.give_point(5)
+            test_over = True
+        elif event.type == KEYDOWN and event.key == K_7:
+            actual_challengers.give_point(6)
+            test_over = True
+        elif event.type == KEYDOWN and event.key == K_8:
+            ask_for_lb = True
+        elif event.type == KEYDOWN and event.key == K_INSERT:
+            round_over = True
+        elif event.type == KEYDOWN and event.key == K_s:
+            act_tournament.save_yourself()
+        elif event.type == MOUSEBUTTONUP:
+            (x, y) = pygame.mouse.get_pos()
+            round_over = handle_mouseclick(x, y, actual_challengers)
+            if not round_over:
+                test_over = True
+    if test_over:
+        update_score_display(actual_challengers)
+        points_given += 1
+        if points_given == act_test.total_points:
+            round_over = True
+        else:
+            objective, genre, game = act_test.get_next_test()
+
+            if enables_animation:
+                display_genre_game_animation(genre, game)
+            display_act_challenge(actual_challengers, objective)
+
+    if round_over:
+        act_test = Challenge(3)
+        actual_challengers = act_tournament.get_next_group(points_given == 3)
+        points_given = 0
+        if actual_challengers is None:
+            game_state = "gameover"
+        else:
+            act_tournament.save_yourself()
+            objective, genre, game = act_test.get_next_test()
+
+            if enables_animation:
+                display_genre_game_animation(genre, game)
+            display_act_challenge(actual_challengers, objective)
+    return actual_challengers, act_test, act_tournament, points_given, game_state, ask_for_lb
 
 
 def handle_mouseclick(x, y, actual_challengers):
@@ -31,97 +113,35 @@ def game_loop(game_state, act_tournament):
     :param act_tournament: The tournament to play
     :type act_tournament: tournament.Tournament
     """
-    round_over = False
-    test_over = True
+    displaying_leader_board = False
+    keep_displaying_leaderborad = False
+    ask_for_lb = False
     actual_challengers = act_tournament.get_next_group()
     loops_in_this_screen = 0
-    points_given = -1
+    points_given = 0
+
     act_test = Challenge(3)
+    o, genre, game = act_test.get_next_test()
+    display_genre_game_animation(genre, game)
+    display_act_challenge(actual_challengers, act_test.act_test[0])
+
     while game_state != "gameover":
-        events = pygame.event.get()
-        for event in events:
-            if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
-                sys.exit()
-            elif event.type == KEYDOWN and event.key == K_1:
-                actual_challengers.give_point(0)
-                test_over = True
-            elif event.type == KEYDOWN and event.key == K_2:
-                actual_challengers.give_point(1)
-                test_over = True
-            elif event.type == KEYDOWN and event.key == K_3:
-                actual_challengers.give_point(2)
-                test_over = True
-            elif event.type == KEYDOWN and event.key == K_4:
-                actual_challengers.give_point(3)
-                test_over = True
-            elif event.type == KEYDOWN and event.key == K_5:
-                actual_challengers.give_point(4)
-                test_over = True
-            elif event.type == KEYDOWN and event.key == K_6:
-                actual_challengers.give_point(5)
-                test_over = True
-            elif event.type == KEYDOWN and event.key == K_7:
-                actual_challengers.give_point(6)
-                test_over = True
-            elif event.type == KEYDOWN and event.key == K_8:
-                animate_arrow_rotation(1, windowSurface)
-            elif event.type == KEYDOWN and event.key == K_INSERT:
-                round_over = True
-            elif event.type == KEYDOWN and event.key == K_s:
-                act_tournament.save_yourself()
-            elif event.type == MOUSEBUTTONUP:
-                (x, y) = pygame.mouse.get_pos()
-                round_over = handle_mouseclick(x, y, actual_challengers)
-                if not round_over:
-                    test_over = True
-        if test_over:
-            test_over = False
-            update_score_display(actual_challengers)
-            points_given += 1
-            if points_given == act_test.total_points:
-                round_over = True
+        if displaying_leader_board:
+            keep_displaying_leaderborad = handle_events_leaderboard()
+            loops_in_this_screen += 3
+        else:
+            actual_challengers, act_test, act_tournament, points_given, game_state, ask_for_lb \
+                = handle_events_standard_mode(actual_challengers, act_test, act_tournament, points_given, game_state)
+
+        if loops_in_this_screen == 600 or (not keep_displaying_leaderborad and displaying_leader_board) or ask_for_lb:
+            loops_in_this_screen = 0
+            displaying_leader_board = not displaying_leader_board
+            if not displaying_leader_board:
+                reset_display()
+                display_act_challenge(actual_challengers, act_test.act_test[0])
             else:
-                objective, genre, game = act_test.get_next_test()
-                objective = objective.split("\n")
-
-                spin_wheel("GENRE", genre)
-                sleep(2)
-                if genre != "FPS":
-                    spin_wheel(genre.upper(), game)
-                    sleep(2)
-
-                display_challengers(actual_challengers)
-
-                if len(objective) < 3:
-                    objective += [" "]
-
-                line = objective[0]
-                font_size = FONT_SIZE + 16
-                left = (WIDTH - 3 * font_size * len(line) // 8) / 2
-                top = 5
-                objective_rubber = pygame.Surface((len(line) * font_size, font_size))
-                objective_rubber.fill((0, 0, 0))
-                display_text(left, top, line, objectiveSurface, objective_rubber, erase_line=True, font_size=font_size)
-
-                objective = objective[1:]
-                for i, line in enumerate(objective):
-                    left = (WIDTH - 3 * FONT_SIZE * len(line) // 8) / 2
-                    top = 5 * HEIGHT / 6 + (i + 1) * FONT_SIZE
-                    objective_rubber = pygame.Surface((len(line) * FONT_SIZE, FONT_SIZE))
-                    objective_rubber.fill((0, 0, 0))
-                    display_text(left, top, line, objectiveSurface, objective_rubber, erase_line=True)
-
-        if round_over:
-            round_over = False
-            points_given = -1
-            test_over = True
-            act_test = Challenge(3)
-            actual_challengers = act_tournament.get_next_group()
-            if actual_challengers is None:
-                game_state = "gameover"
-            else:
-                act_tournament.save_yourself()
-                height = display_challengers(actual_challengers)
+                display_leader_board(act_tournament)
+            sleep(1)
 
         pygame.time.delay(100)
         loops_in_this_screen += 1
