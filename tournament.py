@@ -146,7 +146,7 @@ class Tournament:
             self.ki.add_challenger(self.groups[i].challengers[1])
         self.tournament_type = "elimination directe"
 
-    def get_next_group(self) -> Optional[Group]:
+    def get_next_group(self, is_valid=True) -> Optional[Group]:
         """
             Get the next group in the tournament tree depending on the tournament type
         :return: the next playing group
@@ -154,6 +154,8 @@ class Tournament:
         if self.actual_round < len(self.groups) - 1:
             if self.actual_round >= 0 or self.tournament_type == "randomized pool":
                 if self.tournament_type == "elimination directe":
+                    if not is_valid:
+                        return self.actual_group
                     actual_node = self.tournament_tree.search_node(self.actual_group)
                     if actual_node.get_parent() is not None:
                         actual_node.get_parent().get_value().add_challenger(self.actual_group.winner)
@@ -174,7 +176,7 @@ class Tournament:
                     min_connected = self._get_min_connected_node()
                     if min_connected < self.CONNEXITY_THRESHOLD:
                         self.actual_round = min(self.actual_round + 1, 1)
-                        return self._handle_get_next_group_rand()
+                        return self._handle_get_next_group_rand(is_valid)
                     else:
                         self.__distribute_challengers_rand()
 
@@ -270,16 +272,16 @@ class Tournament:
         """
             Saves the actual state of the game into a file named "savegame"
         """
-        return
         for c in self.challengers_pool:
             c.unload_image()
         with open("savegame", "wb") as saveFile:
             pickle.dump(self, saveFile)
         for c in self.challengers_pool:
             c.reload_image()
+        return
 
-    def _handle_get_next_group_rand(self):
-        if self.actual_round > 0:
+    def _handle_get_next_group_rand(self, is_valid=True):
+        if self.actual_round > 0 and is_valid:
             duel = self.actual_group.winner, self.actual_group.loser
             if self.actual_group.winner not in self.seen_duels.keys():
                 self.seen_duels[self.actual_group.winner] = []
@@ -298,7 +300,7 @@ class Tournament:
                 new_duelist[d] = 1
                 total_weights += 1
             elif len(self.seen_duels) >= len(self.challengers) - 1:
-                if len(self.seen_duels[self.challengers[d]]) < 5:
+                if len(self.seen_duels[self.challengers[d]]) < 3:
                     this_weight = len(self.seen_duels[self.challengers[d]])
                     total_weights += this_weight
                     new_duelist[d] = this_weight
@@ -306,7 +308,7 @@ class Tournament:
                 else:
                     second_choice_duelists[d] = 1
 
-        if len(self.seen_duels) < len(self.challengers) - 1:
+        if len(self.seen_duels) < len(self.challengers):
             duelist1 = list(new_duelist.keys())[random.randrange(0, len(new_duelist))]
             duelist2 = duelist1
             while duelist2 == duelist1:
@@ -328,7 +330,8 @@ class Tournament:
 
         return self.actual_group
 
-    def get_rand(self, total_weights: int, max_weight: int, val_dict: dict):
+    @staticmethod
+    def get_rand(total_weights: int, max_weight: int, val_dict: dict):
         first = random.randrange(0, total_weights)
         first_index = 0
         while first > max_weight - val_dict[list(val_dict.keys())[first_index]]:
