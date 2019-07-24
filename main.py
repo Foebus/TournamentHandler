@@ -57,7 +57,7 @@ def handle_events_standard_mode(actual_challengers, act_test, act_tournament, po
             actual_challengers.give_point(6)
             test_over = True
         elif event.type == KEYDOWN and event.key == K_8:
-            ask_for_lb = True
+            music_handler.test_quotes()
         elif event.type == KEYDOWN and event.key == K_INSERT:
             round_over = True
         elif event.type == KEYDOWN and event.key == K_a:
@@ -103,6 +103,7 @@ def handle_mouseclick(x, y, actual_challengers: Group):
         i = int(x * actual_challengers.challenger_number / w)
         actual_challengers.give_point(i)
         update_score_display(actual_challengers)
+        music_handler.start_quote(actual_challengers.challengers[i].music_dir)
         return False
     else:
         return True

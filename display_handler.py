@@ -6,9 +6,11 @@ import pygame
 from pygame.locals import *
 
 from challenge import Test
+from music_handler import MusicHandler
 from tournament import Group, Tournament
 
 pygame.init()
+music_handler = MusicHandler()
 WIDTH = 1280
 HEIGHT = 780
 FONT_SIZE = 36
@@ -230,11 +232,15 @@ def display_leader_board(tournament: Tournament):
 
 
 def display_genre_game_animation(genre: str, game: str):
+    music_handler.start_loop("general")
     spin_wheel("GENRE", genre)
-    sleep(2)
+
     if genre != "FPS":
-        spin_wheel(genre.upper(), game)
         sleep(2)
+        music_handler.start_loop(genre)
+        spin_wheel(genre.upper(), game)
+    music_handler.stop_music()
+    sleep(2)
 
 
 def spin_wheel(kind, objective):
