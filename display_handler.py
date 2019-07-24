@@ -80,8 +80,9 @@ def display_text(pos_x, pos_y, content, surface, associated_rubber=None, text_co
     rendered_content = font.render(content, 1, text_color)
     text_pos = rendered_content.get_rect(left=pos_x, top=pos_y)
 
-    title_place = Rect(pos_x, pos_y, len(content) * font_size, font_size) if not erase_line else Rect(0, pos_y, WIDTH,
-                                                                                                      font_size)
+    title_place = Rect(pos_x, pos_y, len(content) * font_size * 3 / 8, font_size) if not erase_line else Rect(0, pos_y,
+                                                                                                              WIDTH,
+                                                                                                              font_size)
     if associated_rubber is not None:
         associated_rubber.fill((0, 0, 0))
         surface.blit(associated_rubber, title_place)
@@ -126,10 +127,6 @@ def display_challengers(actual_challengers_to_display: Group):
     for i in range(challenger_number - 1):
         challengerSurface.blit(lightning, ((i + 1) * WIDTH / challenger_number - lightning.get_width() / 2, 0))
 
-    #  Display title
-    display_text(pos_x=WIDTH / 2 - len(str(actual_challengers_to_display.title)) * FONT_SIZE / 2, pos_y=15,
-                 content=actual_challengers_to_display.title, surface=challengerSurface)
-
     challengers_rectangle = Rect(0, 0, WIDTH, HEIGHT)
     pygame.display.update(challengers_rectangle)
     return max_height + FONT_SIZE
@@ -145,7 +142,7 @@ def display_winner(ended_tournament: Tournament):
     font = pygame.font.Font(None, FONT_SIZE)
     act_width = winner.image.get_width()
     act_height = winner.image.get_height()
-    scale_ratio = float(HEIGHT) / act_height
+    scale_ratio = min(float(HEIGHT) / act_height, float(WIDTH) / act_width)
     winner.rescale_image(int(act_width * scale_ratio),
                          int(act_height * scale_ratio))
     challenger_image = winner.image
@@ -167,20 +164,29 @@ def display_act_challenge(actual_challengers: Group, objective: str):
     if len(objective) < 3:
         objective += [" "]
 
+    #  Display title
+    if "final" in actual_challengers.title:
+        title = str(actual_challengers.title)
+        title_size = FONT_SIZE + 20
+        title_rubber = pygame.Surface((WIDTH, title_size))
+        display_text(pos_x=(WIDTH - 3 * title_size * len(title) // 8) / 2, pos_y=5, text_color=(50, 50, 255),
+                     erase_line=True, content=title, surface=challengerSurface, associated_rubber=title_rubber,
+                     font_size=title_size)
+    else:
+        title_size = 0
+
     line = objective[0]
-    font_size = FONT_SIZE + 16
-    left = (WIDTH - 3 * font_size * len(line) // 8) / 2
-    top = 5
-    objective_rubber = pygame.Surface((len(line) * font_size, font_size))
-    objective_rubber.fill((0, 0, 0))
-    display_text(left, top, line, objectiveSurface, objective_rubber, erase_line=True, font_size=font_size)
+    game_size = FONT_SIZE + 16
+    left = (WIDTH - 3 * game_size * len(line) // 8) / 2
+    top = 5 + title_size
+    game_rubber = pygame.Surface((len(line) * game_size * 3 // 8, game_size))
+    display_text(left, top, line, objectiveSurface, game_rubber, font_size=game_size)
 
     objective = objective[1:]
     for i, line in enumerate(objective):
         left = (WIDTH - 3 * FONT_SIZE * len(line) // 8) / 2
         top = 5 * HEIGHT / 6 + (i + 1) * FONT_SIZE
         objective_rubber = pygame.Surface((len(line) * FONT_SIZE, FONT_SIZE))
-        objective_rubber.fill((0, 0, 0))
         display_text(left, top, line, objectiveSurface, objective_rubber, erase_line=True)
 
 
@@ -190,11 +196,11 @@ def display_leader_board(tournament: Tournament):
 
     title = "Classement"
     left = (WIDTH - 3 * FONT_SIZE * len(title) // 8) / 2
-    display_text(pos_x=left, pos_y=HEIGHT//6, content=title, surface=objectiveSurface, font_size=FONT_SIZE + 16)
+    display_text(pos_x=left, pos_y=HEIGHT // 6, content=title, surface=objectiveSurface, font_size=FONT_SIZE + 16)
 
     left_start = WIDTH // 5
-    left_points = WIDTH // 5 + 3 * 20 * FONT_SIZE//8
-    left_games = WIDTH // 5 + 3 * 30 * FONT_SIZE//8
+    left_points = WIDTH // 5 + 3 * 30 * FONT_SIZE // 8
+    left_games = WIDTH // 5 + 3 * 20 * FONT_SIZE // 8
 
     for i, challenger in enumerate(tournament.challengers_pool):
         if i % 2 == 0:
@@ -219,8 +225,8 @@ def display_leader_board(tournament: Tournament):
         points_rubber = pygame.Surface((len(challenger_info) * FONT_SIZE, FONT_SIZE))
         points_rubber.fill((0, 0, 0))
 
-        display_text(left_points, top, points_info, objectiveSurface, points_rubber, text_color=points_color)
         display_text(left_games, top, game_info, objectiveSurface, points_rubber, text_color=games_color)
+        display_text(left_points, top, points_info, objectiveSurface, points_rubber, text_color=points_color)
 
 
 def display_genre_game_animation(genre: str, game: str):
