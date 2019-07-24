@@ -27,6 +27,7 @@ enables_animation = True
 
 def handle_events_standard_mode(actual_challengers, act_test, act_tournament, points_given,
                                 game_state):
+    global enables_animation
     round_over = False
     test_over = False
     ask_for_lb = False
@@ -59,6 +60,8 @@ def handle_events_standard_mode(actual_challengers, act_test, act_tournament, po
             ask_for_lb = True
         elif event.type == KEYDOWN and event.key == K_INSERT:
             round_over = True
+        elif event.type == KEYDOWN and event.key == K_a:
+            enables_animation = not enables_animation
         elif event.type == KEYDOWN and event.key == K_s:
             act_tournament.save_yourself()
         elif event.type == MOUSEBUTTONUP:
