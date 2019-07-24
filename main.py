@@ -97,7 +97,7 @@ def handle_events_standard_mode(actual_challengers, act_test, act_tournament, po
     return actual_challengers, act_test, act_tournament, points_given, game_state, ask_for_lb
 
 
-def handle_mouseclick(x, y, actual_challengers):
+def handle_mouseclick(x, y, actual_challengers: Group):
     (w, h) = pygame.display.get_surface().get_size()
     if y > h / 5:
         i = int(x * actual_challengers.challenger_number / w)
@@ -108,13 +108,11 @@ def handle_mouseclick(x, y, actual_challengers):
         return True
 
 
-def game_loop(game_state, act_tournament):
+def game_loop(game_state: str, act_tournament: Tournament):
     """
 
     :param game_state: Actual game state
-    :type game_state: str
     :param act_tournament: The tournament to play
-    :type act_tournament: tournament.Tournament
     """
     displaying_leader_board = False
     keep_displaying_leaderborad = False
