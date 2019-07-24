@@ -2,10 +2,11 @@ import pygame
 
 
 class Challenger:
-    def __init__(self, name, image_path, initial_points=0):
+    def __init__(self, name, image_path, music_dir, initial_points=0):
         self.name = name
         self.image_path = image_path
         self.points = initial_points
+        self.music_dir = music_dir
         try:
             self.rawImage = pygame.image.load(image_path)
             self.image = self.rawImage
