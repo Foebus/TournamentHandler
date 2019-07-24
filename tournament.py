@@ -173,9 +173,17 @@ class Tournament:
                     if self.actual_round == self.pool_round - 1:
                         self.__distribute_challengers()
                 elif self.tournament_type == "randomized pool":
+                    self.actual_round = min(self.actual_round + 1, 1)
+                    if self.actual_round > 0 and is_valid:
+                        duel = self.actual_group.winner, self.actual_group.loser
+                        if self.actual_group.winner not in self.seen_duels.keys():
+                            self.seen_duels[self.actual_group.winner] = []
+                        if self.actual_group.loser not in self.seen_duels.keys():
+                            self.seen_duels[self.actual_group.loser] = []
+                        self.seen_duels[self.actual_group.winner].append(duel)
+                        self.seen_duels[self.actual_group.loser].append(duel)
                     min_connected = self._get_min_connected_node()
                     if min_connected < self.CONNEXITY_THRESHOLD:
-                        self.actual_round = min(self.actual_round + 1, 1)
                         return self._handle_get_next_group_rand(is_valid)
                     else:
                         self.__distribute_challengers_rand()
@@ -202,7 +210,7 @@ class Tournament:
 
         #  Get the challenger names
         for c in content["Challengers"]:
-            self.challengers[c["Name"]] = challenger.Challenger(c["Name"], c["Image"])
+            self.challengers[c["Name"]] = challenger.Challenger(c["Name"], c["Image"], c["Music"])
 
         #  Then get the groups, fill those as well as the subgroups
         for g in content["Groups"]:
@@ -282,15 +290,10 @@ class Tournament:
 
     def _handle_get_next_group_rand(self, is_valid=True):
         if self.actual_round > 0 and is_valid:
-            duel = self.actual_group.winner, self.actual_group.loser
-            if self.actual_group.winner not in self.seen_duels.keys():
-                self.seen_duels[self.actual_group.winner] = []
-            if self.actual_group.loser not in self.seen_duels.keys():
-                self.seen_duels[self.actual_group.loser] = []
-            self.seen_duels[self.actual_group.winner].append(duel)
-            self.seen_duels[self.actual_group.loser].append(duel)
-            self.actual_group.winner.add_points(self.actual_group.get_points(self.actual_group.winner))
-            self.actual_group.loser.add_points(self.actual_group.get_points(self.actual_group.loser))
+            if len(self.seen_duels[self.actual_group.winner]) <= self.CONNEXITY_THRESHOLD:
+                self.actual_group.winner.add_points(self.actual_group.get_points(self.actual_group.winner))
+            if len(self.seen_duels[self.actual_group.loser]) <= self.CONNEXITY_THRESHOLD:
+                self.actual_group.loser.add_points(self.actual_group.get_points(self.actual_group.loser))
         new_duelist = {}
         second_choice_duelists = {}
         total_weights = 0
