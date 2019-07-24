@@ -80,12 +80,12 @@ def handle_events_standard_mode(actual_challengers, act_test, act_tournament, po
 
     if round_over:
         act_test = Challenge(3)
+        act_tournament.save_yourself()
         actual_challengers = act_tournament.get_next_group(points_given == 3)
         points_given = 0
         if actual_challengers is None:
             game_state = "gameover"
         else:
-            act_tournament.save_yourself()
             objective, genre, game = act_test.get_next_test()
 
             if enables_animation:
